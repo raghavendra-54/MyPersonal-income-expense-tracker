@@ -2,15 +2,18 @@ package com.finance.tracker.service;
 
 import com.finance.tracker.model.Transaction;
 import com.finance.tracker.repository.TransactionRepository;
-import com.finance.tracker.repository.UserRepository; // Keep this import for now, will remove if not needed
-import com.finance.tracker.model.User; // Keep this import for now
+import com.finance.tracker.repository.UserRepository;
+import com.finance.tracker.model.User;
 import com.finance.tracker.model.TransactionType;
 import lombok.RequiredArgsConstructor;
 import com.finance.tracker.dto.CreateTransactionDto;
 import com.finance.tracker.dto.TransactionResponse;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException; 
+
 import org.springframework.stereotype.Service;
-import jakarta.annotation.PostConstruct; // Keep this import for now
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -24,17 +27,42 @@ import java.io.PrintWriter;
 @RequiredArgsConstructor
 public class TransactionService {
     private final TransactionRepository transactionRepository;
-    private final UserRepository userRepository; // Keep this for now
+    private final UserRepository userRepository; 
 
-    // REMOVED @PostConstruct init() for default user creation here
-    // We will create users via registration/login instead
+    // Helper method to get the current authenticated user
+    private User getCurrentAuthenticatedUser() {
+        System.out.println("TransactionService: Attempting to get current authenticated user."); // DEBUG
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            System.out.println("TransactionService: User not authenticated. Throwing exception."); // DEBUG
+            throw new RuntimeException("User not authenticated.");
+        }
+        String userEmail = authentication.getName(); 
+        System.out.println("TransactionService: Authenticated user email from SecurityContext: " + userEmail); // DEBUG
+
+        if ("anonymousUser".equals(userEmail) || userEmail == null || userEmail.isEmpty()) {
+            System.out.println("TransactionService: Anonymous user detected or email is empty. Falling back to default@example.com."); // DEBUG
+            return userRepository.findByEmail("default@example.com")
+                                 .orElseThrow(() -> new UsernameNotFoundException("Default user not found, and no authenticated user."));
+        }
+        
+        User foundUser = userRepository.findByEmail(userEmail)
+                             .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + userEmail));
+        System.out.println("TransactionService: Found user: " + foundUser.getEmail() + " (ID: " + foundUser.getId() + ")"); // DEBUG
+        return foundUser;
+    }
 
     public Map<String, Double> getSummary() {
-        Double income = transactionRepository.getTotalIncome() != null ? 
-                       transactionRepository.getTotalIncome() : 0.0;
-        Double expense = transactionRepository.getTotalExpense() != null ? 
-                        transactionRepository.getTotalExpense() : 0.0;
+        System.out.println("TransactionService: getSummary method called."); // DEBUG
+        User currentUser = getCurrentAuthenticatedUser(); 
+        System.out.println("TransactionService: getSummary for user: " + currentUser.getEmail()); // DEBUG
+        
+        Double income = transactionRepository.getTotalIncomeByUser(currentUser) != null ?
+                       transactionRepository.getTotalIncomeByUser(currentUser) : 0.0;
+        Double expense = transactionRepository.getTotalExpenseByUser(currentUser) != null ?
+                        transactionRepository.getTotalExpenseByUser(currentUser) : 0.0;
 
+        System.out.println("TransactionService: Income: " + income + ", Expense: " + expense); // DEBUG
         return Map.of(
             "totalIncome", income,
             "totalExpense", expense,
@@ -43,30 +71,15 @@ public class TransactionService {
     }
 
     public Transaction createTransaction(CreateTransactionDto dto) {
+        System.out.println("TransactionService: createTransaction method called."); // DEBUG
+        User currentUser = getCurrentAuthenticatedUser(); 
         Transaction transaction = new Transaction();
-        transaction.setTitle(dto.title());
-        transaction.setAmount(dto.amount());
-        transaction.setDate(dto.date() != null ? dto.date() : LocalDate.now());
-        transaction.setType(dto.type());
-        transaction.setCategory(dto.category());
-
-        // TEMPORARY: Assign a user to the transaction (assuming user with ID 1 exists from previous runs or manual creation)
-        // In a real authenticated app, this would be the currently logged-in user.
-        Optional<User> userOptional = userRepository.findById(1L); 
-        if (userOptional.isPresent()) {
-            transaction.setUser(userOptional.get());
-        } else {
-            // Fallback: If no user with ID 1, try to find any user.
-            // If no user exists at all (e.g., fresh H2), this will throw an error until a user is registered.
-            userOptional = userRepository.findAll().stream().findFirst();
-            if (userOptional.isPresent()) {
-                transaction.setUser(userOptional.get());
-            } else {
-                System.err.println("WARNING: No user found to associate with transaction. Please register a user.");
-                // For now, allow saving without user if no user exists, but this is not ideal for real app.
-                // Or throw new RuntimeException("No user found to associate with transaction.");
-            }
-        }
+        transaction.setTitle(dto.getTitle());
+        transaction.setAmount(dto.getAmount());
+        transaction.setDate(dto.getDate() != null ? dto.getDate() : LocalDate.now());
+        transaction.setType(dto.getType());
+        transaction.setCategory(dto.getCategory());
+        transaction.setUser(currentUser); // Associate with the current user
 
         return transactionRepository.save(transaction);
     }
@@ -74,13 +87,15 @@ public class TransactionService {
     public List<TransactionResponse> getAllTransactions(
         String type, String category, LocalDate startDate, LocalDate endDate
     ) {
-        List<Transaction> transactions = transactionRepository.findAll();
+        System.out.println("TransactionService: getAllTransactions method called with filters."); // DEBUG
+        User currentUser = getCurrentAuthenticatedUser(); 
+        List<Transaction> transactions = transactionRepository.findAllByUserOrderByDateDesc(currentUser); // Filter by user
 
         List<Transaction> filteredTransactions = transactions.stream()
             .filter(t -> {
                 boolean matches = true;
                 if (t.getDate() == null) {
-                    return false;
+                    return false; // Or handle as per your requirement
                 }
 
                 if (type != null && !type.isEmpty()) {
@@ -97,24 +112,27 @@ public class TransactionService {
                 }
                 return matches;
             })
-            .sorted(Comparator.comparing(Transaction::getDate).reversed())
+            .sorted(Comparator.comparing(Transaction::getDate).reversed()) // Re-sort after potential filtering
             .collect(Collectors.toList());
 
+        System.out.println("TransactionService: Found " + filteredTransactions.size() + " filtered transactions."); // DEBUG
         return filteredTransactions.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     public Transaction updateTransaction(Long id, CreateTransactionDto dto) {
+        System.out.println("TransactionService: updateTransaction method called for ID: " + id); // DEBUG
+        User currentUser = getCurrentAuthenticatedUser(); 
         try {
-            Transaction existingTransaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found with ID: " + id));
+            Transaction existingTransaction = transactionRepository.findByIdAndUser(id, currentUser)
+                .orElseThrow(() -> new RuntimeException("Transaction not found or not owned by current user with ID: " + id));
 
-            existingTransaction.setTitle(dto.title());
-            existingTransaction.setAmount(dto.amount());
-            existingTransaction.setDate(dto.date() != null ? dto.date() : LocalDate.now());
-            existingTransaction.setType(dto.type());
-            existingTransaction.setCategory(dto.category());
+            existingTransaction.setTitle(dto.getTitle());
+            existingTransaction.setAmount(dto.getAmount());
+            existingTransaction.setDate(dto.getDate() != null ? dto.getDate() : LocalDate.now());
+            existingTransaction.setType(dto.getType());
+            existingTransaction.setCategory(dto.getCategory());
 
             return transactionRepository.save(existingTransaction);
         } catch (Exception e) {
@@ -125,9 +143,11 @@ public class TransactionService {
     }
 
     public void deleteTransaction(Long id) {
+        System.out.println("TransactionService: deleteTransaction method called for ID: " + id); // DEBUG
+        User currentUser = getCurrentAuthenticatedUser(); 
         try {
-            if (!transactionRepository.existsById(id)) {
-                throw new RuntimeException("Transaction not found with ID: " + id);
+            if (!transactionRepository.existsByIdAndUser(id, currentUser)) {
+                throw new RuntimeException("Transaction not found or not owned by current user with ID: " + id);
             }
             transactionRepository.deleteById(id);
         } catch (Exception e) {
@@ -138,6 +158,7 @@ public class TransactionService {
     }
 
     public TransactionResponse convertToDto(Transaction transaction) {
+        System.out.println("TransactionService: convertToDto called for transaction ID: " + transaction.getId()); // DEBUG
         return new TransactionResponse(
             transaction.getId(),
             transaction.getTitle(),
@@ -149,6 +170,7 @@ public class TransactionService {
     }
 
     public byte[] exportTransactionsToCsv(List<TransactionResponse> transactions) {
+        System.out.println("TransactionService: exportTransactionsToCsv method called."); // DEBUG
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              PrintWriter writer = new PrintWriter(bos)) {
 
@@ -159,7 +181,7 @@ public class TransactionService {
                     t.getId(),
                     t.getDate().toString(),
                     t.getType().name(),
-                    t.getCategory(),
+                    t.getCategory() != null ? t.getCategory() : "", 
                     t.getTitle().replace("\"", "\"\""),
                     t.getAmount()
                 );

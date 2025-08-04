@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Finance Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 sidebar bg-dark text-white vh-100">
+                <div class="position-sticky pt-3">
+                    <h4 class="text-center mb-4">Finance Tracker</h4>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard" id="dashboard-link">
+                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#income" id="income-link">
+                                <i class="bi bi-cash-stack me-2"></i>Add Income
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#expense" id="expense-link">
+                                <i class="bi bi-cart me-2"></i>Add Expense
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#transactions" id="transactions-link">
+                                <i class="bi bi-list-ul me-2"></i>Transactions
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto px-md-4 py-4">
+                <div id="content-area">
+                    <!-- User Profile Content -->
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h2 class="card-title mb-4 text-center">User Profile</h2>
+                                    <form id="profileForm">
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="firstName" class="form-label">First Name</label>
+                                                <input type="text" class="form-control" id="firstName" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="lastName" class="form-label">Last Name</label>
+                                                <input type="text" class="form-control" id="lastName" required>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="phone" class="form-label">Contact Number</label>
+                                            <input type="tel" class="form-control" id="phone" pattern="\d{10}" title="Phone number must be 10 digits" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="position" class="form-label">Position</label>
+                                            <select class="form-select" id="position" required>
+                                                <option value="">Select Position</option>
+                                                <option value="Employee">Employee</option>
+                                                <option value="Job Seeker">Job Seeker</option>
+                                                <option value="Business Owner">Business Owner</option>
+                                                <option value="Freelancer">Freelancer</option>
+                                                <option value="Student">Student</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="address" class="form-label">Address</label>
+                                            <input type="text" class="form-control" id="address">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">New Password (leave blank to keep current)</label>
+                                            <input type="password" class="form-control" id="password">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                            <input type="password" class="form-control" id="confirmPassword">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Update Profile</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
+</body>
+</html>

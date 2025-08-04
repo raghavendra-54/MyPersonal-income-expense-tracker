@@ -6,50 +6,84 @@ import com.finance.tracker.dto.AuthResponse;
 import com.finance.tracker.model.User;
 import com.finance.tracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder; // Import PasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import jakarta.annotation.PostConstruct;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder; // Inject PasswordEncoder
+    private final PasswordEncoder passwordEncoder;
+
+    @PostConstruct
+    public void init() {
+        if (userRepository.count() == 0) {
+            User defaultUser = new User();
+            defaultUser.setFirstName("Default");
+            defaultUser.setLastName("User");
+            defaultUser.setEmail("default@example.com");
+            defaultUser.setPhone("1234567890");
+            defaultUser.setPosition("Employee");
+            defaultUser.setAddress("Default Address");
+            defaultUser.setPassword(passwordEncoder.encode("password"));
+            userRepository.save(defaultUser);
+            System.out.println("Default user 'default@example.com' created with password 'password'.");
+        }
+    }
 
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.findByEmail(request.email()).isPresent()) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("User with this email already exists");
         }
 
-        // Basic password matching for registration
-        if (!request.password().equals(request.confirmPassword())) {
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new RuntimeException("Passwords do not match");
         }
 
         User newUser = new User();
-        newUser.setFirstName(request.firstName());
-        newUser.setLastName(request.lastName());
-        newUser.setEmail(request.email());
-        newUser.setPhone(request.phone());
-        newUser.setPosition(request.position());
-        newUser.setAddress(request.address());
-        newUser.setPassword(passwordEncoder.encode(request.password())); // Hash the password
+        newUser.setFirstName(request.getFirstName());
+        newUser.setLastName(request.getLastName());
+        newUser.setEmail(request.getEmail());
+        newUser.setPhone(request.getPhone());
+        newUser.setPosition(request.getPosition());
+        newUser.setAddress(request.getAddress());
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        User savedUser = userRepository.save(newUser);
+        userRepository.save(newUser);
 
-        // In a real application, you would generate a JWT token here.
-        return new AuthResponse("Registration successful for " + savedUser.getEmail());
+        // For registration, token, userId, firstName, lastName can be null
+        return new AuthResponse("Registration successful. Please log in.", null, null, null, null); 
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials: User not found"));
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials: Incorrect password");
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid password");
         }
 
-        // In a real application, you would generate a JWT token here.
-        return new AuthResponse("Login successful for " + user.getEmail());
+        String token = user.getEmail() + "|" + System.currentTimeMillis();
+        
+        // Pass user.getId(), firstName, lastName in the AuthResponse
+        return new AuthResponse("Login successful", token, user.getId(), user.getFirstName(), user.getLastName()); 
+    }
+        
+    public AuthResponse forgotPassword(String email, String newPassword, String confirmPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with this email not found"));
+
+        if (!newPassword.equals(confirmPassword)) {
+            throw new RuntimeException("New passwords do not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // For forgot password, token, userId, firstName, lastName can be null
+        return new AuthResponse("Password reset successful. Please log in with your new password.", null, null, null, null);
     }
 }

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Finance Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding-top: 5rem;
+        }
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.2em;
+        }
+        #authAlert {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="auth-container">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="text-center mb-4">Login</h2>
+                
+                <!-- Alert Box -->
+                <div id="authAlert" class="alert alert-dismissible fade show" role="alert">
+                    <span id="alertMessage"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <button type="submit" id="loginBtn" class="btn btn-primary w-100">
+                        Login
+                    </button>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <a href="register.html" class="text-muted">Create an account</a> | 
+                    <a href="forgot-password.html" class="text-muted">Forgot password?</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & Custom JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/auth.js"></script>
+    
+    <script>
+        // Initialize Bootstrap alert
+        const alert = new bootstrap.Alert(document.getElementById('authAlert'));
+        
+        // Function to show alerts
+        function showAlert(message, type = 'danger') {
+            const alertBox = document.getElementById('authAlert');
+            const messageSpan = document.getElementById('alertMessage');
+            
+            alertBox.className = `alert alert-${type} alert-dismissible fade show`;
+            messageSpan.textContent = message;
+            alertBox.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

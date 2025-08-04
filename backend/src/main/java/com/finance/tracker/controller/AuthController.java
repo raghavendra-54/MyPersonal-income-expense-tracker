@@ -1,14 +1,15 @@
 package com.finance.tracker.controller;
 
+import com.finance.tracker.dto.AuthResponse;
 import com.finance.tracker.dto.LoginRequest;
 import com.finance.tracker.dto.RegisterRequest;
-import com.finance.tracker.dto.AuthResponse;
+import com.finance.tracker.dto.ResetPasswordRequest; // Added import for ResetPasswordRequest
 import com.finance.tracker.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,6 +27,23 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginUser(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
+        return ResponseEntity.ok()
+            .header("X-Auth-Token", response.getToken()) // Add token to header
+            .body(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<AuthResponse> forgotPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        AuthResponse response = authService.forgotPassword(request.getEmail(), request.getNewPassword(), request.getConfirmPassword());
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/auth/verify")
+public ResponseEntity<Void> verifyToken(@RequestHeader("X-Auth-Token") String token) {
+    // Simple verification logic - replace with your actual token validation
+    if (token == null || !token.contains("|")) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    return ResponseEntity.ok().build();
+}
 }
