@@ -38,15 +38,9 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // This endpoint is used by app.js for session verification, but no longer makes a user profile lookup
-    @GetMapping("/verify") // Corrected path to be relative to @RequestMapping("/api/auth")
+    @GetMapping("/verify")
     public ResponseEntity<Void> verifyToken(@RequestHeader("X-Auth-Token") String token) {
-        // Simple verification logic - actual validation happens in SecurityConfig's filter
-        // If the request reaches here, it means the token was processed by SecurityConfig
-        // and the user is authenticated (SecurityContextHolder contains userDetails).
-        // If the token was invalid or missing, SecurityConfig would have prevented access
-        // or set the authentication as null.
-        if (token == null || token.isEmpty()) { // No need for token.contains("|") here
+        if (token == null || token.isEmpty()) { 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.ok().build();

@@ -170,28 +170,33 @@ public class TransactionService {
     }
 
     public byte[] exportTransactionsToCsv(List<TransactionResponse> transactions) {
-        System.out.println("TransactionService: exportTransactionsToCsv method called."); 
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             PrintWriter writer = new PrintWriter(bos)) {
+    System.out.println("TransactionService: exportTransactionsToCsv method called.");
+    System.out.println("TransactionService: Number of transactions to export: " + transactions.size());
+    try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+         PrintWriter writer = new PrintWriter(bos)) {
 
-            writer.println("ID,Date,Type,Category,Title,Amount");
+        writer.println("ID,Date,Type,Category,Title,Amount");
 
-            for (TransactionResponse t : transactions) {
-                writer.printf("%d,%s,%s,%s,\"%s\",%.2f%n",
-                    t.getId(),
-                    t.getDate().toString(),
-                    t.getType().name(),
-                    t.getCategory() != null ? t.getCategory() : "", 
-                    t.getTitle().replace("\"", "\"\""),
-                    t.getAmount()
-                );
-            }
-            writer.flush();
-            return bos.toByteArray();
+        for (TransactionResponse t : transactions) {
+            // FIX: Safely handle a potential null date to prevent NullPointerException
+            String dateString = t.getDate() != null ? t.getDate().toString() : "";
 
-        } catch (Exception e) {
-            System.err.println("Error generating CSV: " + e.getMessage());
-            throw new RuntimeException("Failed to generate CSV export", e);
+            writer.printf("%d,%s,%s,%s,\"%s\",%.2f%n",
+                t.getId(),
+                dateString,
+                t.getType().name(),
+                t.getCategory() != null ? t.getCategory() : "", 
+                t.getTitle().replace("\"", "\"\""),
+                t.getAmount()
+            );
         }
+        writer.flush();
+        return bos.toByteArray();
+
+    } catch (Exception e) {
+        System.err.println("Error generating CSV: " + e.getMessage());
+        e.printStackTrace();
+        throw new RuntimeException("Failed to generate CSV export", e);
     }
+}
 }

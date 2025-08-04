@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userId = localStorage.getItem('userId');
     const userName = localStorage.getItem('userName'); 
 
-    const isOnAuthPage = window.location.pathname.includes('/auth/'); // Check if current page is an auth page
+    const isOnAuthPage = window.location.pathname.includes('/auth/'); 
 
     console.log('DOMContentLoaded: Checking auth state.');
     console.log('  authToken:', authToken ? 'Present' : 'Missing');
@@ -36,38 +36,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentUser.name = userName;
         currentUser.isLoggedIn = true;
 
-        if (isOnAuthPage) { // If logged in, and on an auth page, redirect to dashboard
+        if (isOnAuthPage) { 
             console.log('  Already logged in on auth page, redirecting to index.html.');
             window.location.href = '/index.html';
             return;
-        } else { // If logged in, and not on auth page (e.g. index.html), initialize app directly
+        } else { 
             console.log('  All required localStorage items found. Initializing app directly.');
             initApp();
-            return; // Exit here as app is initialized
+            return; 
         }
     } 
     // Scenario 2: User is NOT logged in (missing localStorage items)
     else {
-        // If not logged in and NOT on an auth page, redirect to login.html
         if (!isOnAuthPage) {
             console.log('  Not logged in and not on auth page. Redirecting to login.html.');
-            logoutUser(); // This will clear any partial data and redirect
+            logoutUser(); 
             return;
         }
-        // If not logged in and IS on an auth page, allow auth page to load normally
         console.log('  Not logged in, but on an auth page. Allowing page to load.');
     }
 });
 
 function initApp() {
     console.log('App initialized. User is logged in.');
-    // Set up navigation event listeners
     document.getElementById('dashboard-link').addEventListener('click', (e) => { e.preventDefault(); loadPage('dashboard'); });
     document.getElementById('income-link').addEventListener('click', (e) => { e.preventDefault(); loadPage('income'); });
     document.getElementById('expense-link').addEventListener('click', (e) => { e.preventDefault(); loadPage('expense'); });
     document.getElementById('transactions-link').addEventListener('click', (e) => { e.preventDefault(); loadPage('transactions'); });
     
-    // Add profile link and logout link dynamically if not already present
     const sidebarNav = document.querySelector('.sidebar .nav');
     if (sidebarNav) {
         if (!document.getElementById('profile-link')) {
@@ -87,7 +83,6 @@ function initApp() {
         }
     }
 
-    // Add developer contact button
     if (sidebarNav && !document.getElementById('developer-contact-link')) {
         const devContactItem = document.createElement('li');
         devContactItem.className = 'nav-item';
@@ -99,13 +94,10 @@ function initApp() {
         });
     }
 
-
-    // Load initial page (e.g., dashboard) based on hash or default
     const initialHash = window.location.hash.substring(1);
     loadPage(initialHash || 'dashboard');
 }
 
-// Function to update the welcome message on the dashboard
 function updateWelcomeMessage() {
     const welcomeElement = document.getElementById('welcome-message'); 
     if (welcomeElement) {
@@ -127,7 +119,7 @@ function logoutUser() {
 
 async function loadPage(page) {
     console.log(`app.js: loadPage called for: ${page}`);
-    if (!currentUser.isLoggedIn && !window.location.pathname.includes('/auth/')) { // Simplified check based on updated DOMContentLoaded
+    if (!currentUser.isLoggedIn && !window.location.pathname.includes('/auth/')) { 
         window.location.href = '/auth/login.html';
         return;
     }
@@ -135,7 +127,6 @@ async function loadPage(page) {
     if (contentArea) { 
         contentArea.innerHTML = `<div class="text-center mt-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
     }
-
 
     switch(page) {
         case 'dashboard':
@@ -179,36 +170,41 @@ async function fetchWithAuth(url, options = {}) {
     };
 
     try {
-        const response = await fetch(url, { 
-            ...options,
-            headers,
-            credentials: 'omit'
-        });
+    const response = await fetch(url, { 
+        ...options,
+        headers,
+        credentials: 'omit'
+    });
 
-        if (response.status === 401 || response.status === 403) {
-            if (!window.location.pathname.includes('/auth/login.html')) {
-                alert('Session expired. Please log in again.');
-                logoutUser();
-            }
-            throw new Error('Unauthorized');
+    if (response.status === 401 || response.status === 403) {
+        if (!window.location.pathname.includes('/auth/login.html')) {
+            alert('Session expired. Please log in again.');
+            logoutUser();
         }
-
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-             return response; 
-        } else {
-            const errorText = await response.text();
-            throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorText}`);
-        }
-    } catch (error) {
-        console.error('API Error:', error);
-        if (error.message && !error.message.includes('Unauthorized') && !error.message.includes('Failed to fetch')) {
-            alert(`API Error: ${error.message}. Please check console for details.`);
-        } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-            alert('Network error. Could not connect to the server. Please check your internet connection or server status.');
-        }
-        throw error;
+        throw new Error('Unauthorized');
     }
+
+    // Only throw an error if the response status is not a success (200-299)
+    if (!response.ok) {
+        let errorText = 'API Error';
+        try {
+            errorText = await response.text(); // Try to get the error message text
+        } catch (e) {
+            // Ignore if response body is empty
+        }
+        throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return response; // Return the response object for all successful statuses
+} catch (error) {
+    console.error('API Error:', error);
+    if (error.message && !error.message.includes('Unauthorized') && !error.message.includes('Failed to fetch')) {
+        alert(`API Error: ${error.message}. Please check console for details.`);
+    } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        alert('Network error. Could not connect to the server. Please check your internet connection or server status.');
+    }
+    throw error;
+}
 }
 
 async function loadDashboard() {
@@ -217,6 +213,113 @@ async function loadDashboard() {
         return;
     }
 
+    try {
+        contentArea.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Dashboard</h2>
+                <div class="text-muted" id="welcome-message">Welcome, ${currentUser.name}</div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card summary-card income-card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">Total Income</h5>
+                            <h2 class="card-text" id="total-income">₹0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card summary-card expense-card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">Total Expenses</h5>
+                            <h2 class="card-text" id="total-expense">₹0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card summary-card balance-card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">Balance</h5>
+                            <h2 class="card-text" id="balance">₹0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Expense Categories</h5>
+                            <div class="chart-container">
+                                <canvas id="expenseChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Monthly Overview</h5>
+                            <div class="chart-container">
+                                <canvas id="monthlyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Transactions</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-transactions">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // This ensures updateWelcomeMessage and data loading happens *after* the browser has parsed the new elements.
+        updateWelcomeMessage();
+
+        window.requestAnimationFrame(async () => {
+            try {
+                await loadSummaryData();
+                await initExpenseChart();
+                await initMonthlyChart();
+                await loadRecentTransactions();
+            } catch (error) {
+                console.error('Error in deferred dashboard data loading:', error);
+                // If dashboard still spins, the error likely comes from here.
+                // Display a user-friendly error message on the dashboard itself.
+                const dashboardArea = document.querySelector('#content-area .row'); // Select a relevant area
+                if (dashboardArea) {
+                    dashboardArea.innerHTML = `<div class="alert alert-danger text-center">Failed to load dashboard data. Please try again.</div>`;
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error setting up dashboard HTML:', error); // This catches errors related to setting contentArea.innerHTML
+        if (contentArea) {
+            contentArea.innerHTML = `<div class="alert alert-danger">Error loading dashboard layout. ${error.message}</div>`;
+        }
+    }
+}
+
+async function loadSummaryData() {
     try {
         const response = await fetchWithAuth(`${API_BASE_URL}/transactions/summary`);
         if (!response.ok) throw new Error('Failed to fetch summary');
@@ -233,15 +336,7 @@ async function loadDashboard() {
         if (incomeElement) incomeElement.textContent = `Error`;
         if (expenseElement) expenseElement.textContent = `Error`;
         if (balanceElement) balanceElement.textContent = `Error`;
-    }
-
-    try {
-        await initExpenseChart();
-        await initMonthlyChart();
-        await loadRecentTransactions();
-    } catch (error) {
-        console.error('Error loading dashboard charts or recent transactions:', error);
-        // This catch block is for chart/recent transactions specific errors after summary is loaded
+        throw error; // Re-throw to propagate to the calling requestAnimationFrame catch
     }
 }
 
@@ -291,6 +386,7 @@ async function initExpenseChart() {
         console.error('Error initializing expense chart:', error);
         const chartContainer = document.getElementById('expenseChart') ? document.getElementById('expenseChart').closest('.chart-container') : null;
         if (chartContainer) chartContainer.innerHTML = '<div class="alert alert-warning text-center">Failed to load expense chart data.</div>';
+        throw error; // Re-throw to propagate
     }
 }
 
@@ -359,6 +455,7 @@ async function initMonthlyChart() {
         console.error('Error initializing monthly chart:', error);
         const chartContainer = document.getElementById('monthlyChart') ? document.getElementById('monthlyChart').closest('.chart-container') : null;
         if (chartContainer) chartContainer.innerHTML = '<div class="alert alert-warning text-center">Failed to load monthly chart data.</div>';
+        throw error; // Re-throw to propagate
     }
 }
 
@@ -405,6 +502,7 @@ async function loadRecentTransactions() {
                 </tr>
             `;
         }
+        throw error; // Re-throw to propagate
     }
 }
 
@@ -666,7 +764,7 @@ async function loadTransactions() {
         loadAllTransactions();
     });
 
-    document.getElementById('exportBtn').addEventListener('click', () => {
+    document.getElementById('exportBtn').addEventListener('click', async () => {
         const type = document.getElementById('filterType').value;
         const category = document.getElementById('filterCategory').value;
         const startDate = document.getElementById('filterStartDate').value;
@@ -678,14 +776,41 @@ async function loadTransactions() {
         if (startDate) queryParams.append('startDate', startDate);
         if (endDate) queryParams.append('endDate', endDate);
 
-        // Construct the full URL for export, including current API_BASE_URL
         const exportUrl = `${API_BASE_URL}/transactions/export?${queryParams.toString()}`;
-        console.log("Attempting to export from URL:", exportUrl); // Debugging line for export
+        console.log("Attempting to export from URL:", exportUrl);
 
-        // For direct file download, window.open is usually the most straightforward way.
-        // It bypasses the fetchWithAuth's error handling and content-type checks,
-        // letting the browser handle the file download directly based on server headers.
-        window.open(exportUrl, '_blank');
+        try {
+            const response = await fetchWithAuth(exportUrl);
+
+            if (!response.ok) {
+                throw new Error(`Server responded with status ${response.status}`);
+            }
+
+            let filename = 'transactions.csv';
+            const disposition = response.headers.get('Content-Disposition');
+            if (disposition && disposition.indexOf('attachment') !== -1) {
+                const filenameRegex = /filename="?([^"]*)"?/;
+                const matches = filenameRegex.exec(disposition);
+                if (matches != null && matches[1]) filename = matches[1];
+            }
+
+            const blob = await response.blob();
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+
+            console.log("Download successfully initiated.");
+        } catch (error) {
+            console.error('Error during export:', error);
+            alert(`Failed to export transactions: ${error.message}`);
+        }
     });
 
     loadAllTransactions();
@@ -762,6 +887,7 @@ async function filterTransactions() {
 
 async function editTransaction(id) {
     try {
+        // Fetch all transactions to find the one to edit (less efficient but works for small datasets)
         const allTransactionsResponse = await fetchWithAuth(`${API_BASE_URL}/transactions`);
         if (!allTransactionsResponse.ok) throw new Error('Failed to fetch transactions for edit lookup');
         const allTransactions = await allTransactionsResponse.json();
@@ -778,13 +904,13 @@ async function editTransaction(id) {
         const newDate = prompt('Enter new date (YYYY-MM-DD):', transactionToEdit.date);
 
         if (newTitle === null || newAmount === null || newCategory === null || newDate === null) {
-            return;
+            return; // User cancelled
         }
 
         const updatedTransactionData = {
             title: newTitle,
             amount: parseFloat(newAmount),
-            type: transactionToEdit.type,
+            type: transactionToEdit.type, // Keep original type
             category: newCategory,
             date: newDate
         };
@@ -802,8 +928,8 @@ async function editTransaction(id) {
 
         const updatedTransaction = await updateResponse.json();
         alert('Transaction updated successfully!');
-        loadAllTransactions();
-        loadDashboard();
+        loadAllTransactions(); // Refresh transaction list
+        loadDashboard(); // Refresh dashboard summary/charts
     } catch (error) {
         console.error('Error updating transaction:', error);
         if (error.message && !error.message.includes('Unauthorized')) {
@@ -883,7 +1009,7 @@ function showCustomConfirm(message, onConfirm) {
 }
 
 async function loadProfilePage() {
-    if (!currentUser.isLoggedIn) { // Removed !currentUser.email check as it's implied by isLoggedIn if userName is present
+    if (!currentUser.isLoggedIn) { 
         contentArea.innerHTML = `<div class="alert alert-warning text-center">Please log in to view your profile.</div>`;
         return;
     }
@@ -1020,7 +1146,7 @@ function showDeveloperContact() {
         "Developer Contact Information:\n\n" +
         "Name: Raghavendra Gattu\n" +
         "Email: gatturaghava.edu123@gmail.com\n" +
-        "LinkedIn: linkedin.com/in/raghavendra-gattu-7b8b20235\n" +
+        "LinkedIn: www.linkedin.com/in/raghavendra-gattu\n" +
         "GitHub: github.com/Raghavendra-54\n" +
         "Project: MyPersonal-income-expense-tracker"
     );

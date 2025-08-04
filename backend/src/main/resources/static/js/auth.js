@@ -1,5 +1,5 @@
 // API Configuration
-// IMPORTANT: Replace this with your actual Codespaces public URL if it changes.
+// IMPORTANT: Replace this with your actual Codespaces public URL.
 // Example: 'https://your-codespace-name-8080.app.github.dev/api'
 const API_BASE_URL = 'https://curly-space-telegram-69g974w9g5qqc5xrg-8080.app.github.dev/api'; 
 
@@ -69,7 +69,7 @@ async function handleLogin(e) {
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('userEmail', email);
         localStorage.setItem('userId', data.userId); 
-        localStorage.setItem('userName', `${data.firstName} ${data.lastName}`); // Store full name 
+        localStorage.setItem('userName', `${data.firstName} ${data.lastName}`); 
         
         // Redirect to dashboard
         window.location.href = '/index.html';
@@ -192,7 +192,6 @@ async function handleForgotPassword(e) {
 
 // Utility Functions
 function showAlert(message, type = 'info') { 
-    // Remove any existing alerts first
     const existingAlert = document.querySelector('.auth-alert'); 
     if (existingAlert) {
         existingAlert.remove(); 
@@ -202,7 +201,6 @@ function showAlert(message, type = 'info') {
     alertDiv.className = `auth-alert alert alert-${type}`; 
     alertDiv.textContent = message; 
     
-    // Attempt to prepend to the form, or fallback to body if no form
     const form = document.querySelector('form'); 
     const targetElement = form || document.body.querySelector('.card-body') || document.body;
     targetElement.prepend(alertDiv);
@@ -222,10 +220,4 @@ function showLoading(show) {
     });
 }
 
-function logoutUser() { 
-    localStorage.removeItem('authToken'); 
-    localStorage.removeItem('userEmail'); 
-    localStorage.removeItem('userId'); 
-    localStorage.removeItem('userName'); 
-    window.location.href = '/auth/login.html'; 
-}
+// logoutUser function is now exclusively in app.js
