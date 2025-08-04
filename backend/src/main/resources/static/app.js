@@ -21,37 +21,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userId = localStorage.getItem('userId');
     const userName = localStorage.getItem('userName'); 
 
+    const isOnAuthPage = window.location.pathname.includes('/auth/'); // Check if current page is an auth page
+
     console.log('DOMContentLoaded: Checking auth state.');
     console.log('  authToken:', authToken ? 'Present' : 'Missing');
     console.log('  userEmail:', userEmail);
     console.log('  userId:', userId);
-    console.log('  userName:', userName); 
+    console.log('  userName:', userName);
 
-    // If on an auth page, allow it to load without immediate redirect
-    if (window.location.pathname.includes('/auth/')) {
-        if (authToken && userEmail && userId && userName) { 
+    // Scenario 1: User is already logged in (localStorage has all items)
+    if (authToken && userEmail && userId && userName) {
+        currentUser.email = userEmail;
+        currentUser.id = userId;
+        currentUser.name = userName;
+        currentUser.isLoggedIn = true;
+
+        if (isOnAuthPage) { // If logged in, and on an auth page, redirect to dashboard
             console.log('  Already logged in on auth page, redirecting to index.html.');
             window.location.href = '/index.html';
+            return;
+        } else { // If logged in, and not on auth page (e.g. index.html), initialize app directly
+            console.log('  All required localStorage items found. Initializing app directly.');
+            initApp();
+            return; // Exit here as app is initialized
         }
-        return; 
+    } 
+    // Scenario 2: User is NOT logged in (missing localStorage items)
+    else {
+        // If not logged in and NOT on an auth page, redirect to login.html
+        if (!isOnAuthPage) {
+            console.log('  Not logged in and not on auth page. Redirecting to login.html.');
+            logoutUser(); // This will clear any partial data and redirect
+            return;
+        }
+        // If not logged in and IS on an auth page, allow auth page to load normally
+        console.log('  Not logged in, but on an auth page. Allowing page to load.');
     }
-    
-    // For non-auth pages, check authentication
-    if (!authToken || !userEmail || !userId || !userName) {
-        console.log('  Missing auth details on non-auth page. Logging out.');
-        logoutUser(); 
-        return;
-    }
-
-    // Populate currentUser from localStorage immediately for UI updates
-    currentUser.email = userEmail;
-    currentUser.id = userId;
-    currentUser.name = userName; 
-    currentUser.isLoggedIn = true; 
-
-    // Directly initialize the app if localStorage contains necessary data
-    console.log('All required localStorage items found. Initializing app directly.');
-    initApp(); 
 });
 
 function initApp() {
@@ -108,7 +113,7 @@ function updateWelcomeMessage() {
     }
 }
 
-function logoutUser() {
+function logoutUser() { 
     localStorage.removeItem('authToken');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userId');
@@ -122,7 +127,7 @@ function logoutUser() {
 
 async function loadPage(page) {
     console.log(`app.js: loadPage called for: ${page}`);
-    if (!currentUser.isLoggedIn && !['login', 'register', 'forgot-password'].includes(page) && !window.location.pathname.includes('/auth/')) {
+    if (!currentUser.isLoggedIn && !window.location.pathname.includes('/auth/')) { // Simplified check based on updated DOMContentLoaded
         window.location.href = '/auth/login.html';
         return;
     }
@@ -213,99 +218,6 @@ async function loadDashboard() {
     }
 
     try {
-        contentArea.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Dashboard</h2>
-                <div class="text-muted" id="welcome-message">Welcome, ${currentUser.name}</div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-md-4 mb-3">
-                    <div class="card summary-card income-card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title text-success">Total Income</h5>
-                            <h2 class="card-text" id="total-income">₹0</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card summary-card expense-card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title text-danger">Total Expenses</h5>
-                            <h2 class="card-text" id="total-expense">₹0</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card summary-card balance-card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title text-primary">Balance</h5>
-                            <h2 class="card-text" id="balance">₹0</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">Expense Categories</h5>
-                            <div class="chart-container">
-                                <canvas id="expenseChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">Monthly Overview</h5>
-                            <div class="chart-container">
-                                <canvas id="monthlyChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h5 class="card-title">Recent Transactions</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Description</th>
-                                    <th>Category</th>
-                                    <th>Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody id="recent-transactions">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        `;
-        updateWelcomeMessage();
-
-        await loadSummaryData();
-        await initExpenseChart();
-        await initMonthlyChart();
-        await loadRecentTransactions();
-
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
-        if (error.message && !error.message.includes('Unauthorized')) {
-            contentArea.innerHTML = `<div class="alert alert-danger">Error loading dashboard data. ${error.message}</div>`;
-        }
-    }
-}
-
-async function loadSummaryData() {
-    try {
         const response = await fetchWithAuth(`${API_BASE_URL}/transactions/summary`);
         if (!response.ok) throw new Error('Failed to fetch summary');
         const data = await response.json();
@@ -321,6 +233,15 @@ async function loadSummaryData() {
         if (incomeElement) incomeElement.textContent = `Error`;
         if (expenseElement) expenseElement.textContent = `Error`;
         if (balanceElement) balanceElement.textContent = `Error`;
+    }
+
+    try {
+        await initExpenseChart();
+        await initMonthlyChart();
+        await loadRecentTransactions();
+    } catch (error) {
+        console.error('Error loading dashboard charts or recent transactions:', error);
+        // This catch block is for chart/recent transactions specific errors after summary is loaded
     }
 }
 
@@ -757,7 +678,13 @@ async function loadTransactions() {
         if (startDate) queryParams.append('startDate', startDate);
         if (endDate) queryParams.append('endDate', endDate);
 
+        // Construct the full URL for export, including current API_BASE_URL
         const exportUrl = `${API_BASE_URL}/transactions/export?${queryParams.toString()}`;
+        console.log("Attempting to export from URL:", exportUrl); // Debugging line for export
+
+        // For direct file download, window.open is usually the most straightforward way.
+        // It bypasses the fetchWithAuth's error handling and content-type checks,
+        // letting the browser handle the file download directly based on server headers.
         window.open(exportUrl, '_blank');
     });
 
@@ -931,6 +858,7 @@ function showCustomConfirm(message, onConfirm) {
                         <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
                     </div>
                 </div>
+                </div>
             </div>
         </div>
     `;
@@ -955,7 +883,7 @@ function showCustomConfirm(message, onConfirm) {
 }
 
 async function loadProfilePage() {
-    if (!currentUser.isLoggedIn || !currentUser.email) {
+    if (!currentUser.isLoggedIn) { // Removed !currentUser.email check as it's implied by isLoggedIn if userName is present
         contentArea.innerHTML = `<div class="alert alert-warning text-center">Please log in to view your profile.</div>`;
         return;
     }
