@@ -23,7 +23,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // Update user profile by ID (already correct)
+    // Update user profile by ID
     @PutMapping("/{id}")
     public ResponseEntity<User> updateProfile(@PathVariable Long id, @Valid @RequestBody User updatedUser) {
         User user = userService.updateProfile(id, updatedUser);

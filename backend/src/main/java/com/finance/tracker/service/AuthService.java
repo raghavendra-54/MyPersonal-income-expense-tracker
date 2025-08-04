@@ -54,7 +54,6 @@ public class AuthService {
 
         userRepository.save(newUser);
 
-        // For registration, token, userId, firstName, lastName can be null
         return new AuthResponse("Registration successful. Please log in.", null, null, null, null); 
     }
 
@@ -68,7 +67,6 @@ public class AuthService {
 
         String token = user.getEmail() + "|" + System.currentTimeMillis();
         
-        // Pass user.getId(), firstName, lastName in the AuthResponse
         return new AuthResponse("Login successful", token, user.getId(), user.getFirstName(), user.getLastName()); 
     }
         
@@ -83,7 +81,6 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // For forgot password, token, userId, firstName, lastName can be null
         return new AuthResponse("Password reset successful. Please log in with your new password.", null, null, null, null);
     }
 }

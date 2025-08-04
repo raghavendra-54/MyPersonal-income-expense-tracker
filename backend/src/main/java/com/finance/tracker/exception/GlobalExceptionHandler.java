@@ -17,8 +17,8 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         errors.put("error", "An unexpected error occurred: " + e.getMessage());
         return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR) // 500 status
-            .body(errors); // Return JSON map
+            .status(HttpStatus.INTERNAL_SERVER_ERROR) 
+            .body(errors); 
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -31,16 +31,15 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        return ResponseEntity.badRequest().body(errors); // 400 status
+        return ResponseEntity.badRequest().body(errors); 
     }
 
-    // Add a specific handler for RuntimeException if you throw them
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException e) {
         Map<String, String> errors = new HashMap<>();
         errors.put("error", e.getMessage());
         return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST) // Or INTERNAL_SERVER_ERROR depending on the specific RuntimeException
+            .status(HttpStatus.BAD_REQUEST) 
             .body(errors);
     }
 }

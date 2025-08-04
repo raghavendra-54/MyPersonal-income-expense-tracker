@@ -34,6 +34,6 @@ public class Transaction {
     private String category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id") // SIMPLIFIED: REMOVE referencedColumnName and table
+    @JoinColumn(name = "user_id") 
     private User user;
 }

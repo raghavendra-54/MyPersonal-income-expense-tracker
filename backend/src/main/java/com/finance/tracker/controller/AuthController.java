@@ -3,7 +3,7 @@ package com.finance.tracker.controller;
 import com.finance.tracker.dto.AuthResponse;
 import com.finance.tracker.dto.LoginRequest;
 import com.finance.tracker.dto.RegisterRequest;
-import com.finance.tracker.dto.ResetPasswordRequest; // Added import for ResetPasswordRequest
+import com.finance.tracker.dto.ResetPasswordRequest; 
 import com.finance.tracker.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class AuthController {
     public ResponseEntity<AuthResponse> loginUser(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok()
-            .header("X-Auth-Token", response.getToken()) // Add token to header
+            .header("X-Auth-Token", response.getToken()) 
             .body(response);
     }
 
@@ -38,12 +38,17 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/auth/verify")
-public ResponseEntity<Void> verifyToken(@RequestHeader("X-Auth-Token") String token) {
-    // Simple verification logic - replace with your actual token validation
-    if (token == null || !token.contains("|")) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    // This endpoint is used by app.js for session verification, but no longer makes a user profile lookup
+    @GetMapping("/verify") // Corrected path to be relative to @RequestMapping("/api/auth")
+    public ResponseEntity<Void> verifyToken(@RequestHeader("X-Auth-Token") String token) {
+        // Simple verification logic - actual validation happens in SecurityConfig's filter
+        // If the request reaches here, it means the token was processed by SecurityConfig
+        // and the user is authenticated (SecurityContextHolder contains userDetails).
+        // If the token was invalid or missing, SecurityConfig would have prevented access
+        // or set the authentication as null.
+        if (token == null || token.isEmpty()) { // No need for token.contains("|") here
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok().build();
     }
-    return ResponseEntity.ok().build();
-}
 }

@@ -1,5 +1,7 @@
 // API Configuration
-const API_BASE_URL = 'https://symmetrical-space-guacamole-pjrjqp9jr9773rg7p-8080.app.github.dev/api';
+// IMPORTANT: Replace this with your actual Codespaces public URL if it changes.
+// Example: 'https://your-codespace-name-8080.app.github.dev/api'
+const API_BASE_URL = 'https://curly-space-telegram-69g974w9g5qqc5xrg-8080.app.github.dev/api'; 
 
 // Initialize when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,19 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeAuthForms() {
-    // Login Form
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
     }
 
-    // Registration Form
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', handleRegister);
     }
 
-    // Forgot Password Form
     const forgotPasswordForm = document.getElementById('forgotPasswordForm');
     if (forgotPasswordForm) {
         forgotPasswordForm.addEventListener('submit', handleForgotPassword);
@@ -53,7 +52,6 @@ async function handleLogin(e) {
         });
 
         if (!response.ok) {
-            // Try to parse JSON error first, fallback to text
             let errorText = 'Login failed';
             try {
                 const errorData = await response.json();
@@ -65,20 +63,20 @@ async function handleLogin(e) {
         }
 
         const data = await response.json();
-        console.log('Login successful. Received data:', data);
+        console.log('Login successful. Received data:', data); 
         
         // Store tokens and user details
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('userEmail', email);
-        localStorage.setItem('userId', data.userId);
-        localStorage.setItem('userName', `${data.firstName} ${data.lastName}`); // NEW: Store full name
+        localStorage.setItem('userId', data.userId); 
+        localStorage.setItem('userName', `${data.firstName} ${data.lastName}`); // Store full name 
         
         // Redirect to dashboard
         window.location.href = '/index.html';
 
     } catch (error) {
         console.error('Login error:', error);
-        showAlert(error.message || 'Login failed. Please try again.', 'danger'); // Use showAlert for consistent styling
+        showAlert(error.message || 'Login failed. Please try again.', 'danger'); 
     } finally {
         if (loginBtn) {
             loginBtn.disabled = false;
@@ -118,8 +116,14 @@ async function handleRegister(e) {
         });
 
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Registration failed');
+            let errorText = 'Registration failed';
+            try {
+                const errorData = await response.json();
+                errorText = errorData.message || Object.values(errorData).join(', ') || 'Registration failed.';
+            } catch (jsonError) {
+                errorText = await response.text();
+            }
+            throw new Error(errorText);
         }
 
         showAlert('Registration successful! Please login.', 'success');
@@ -143,7 +147,7 @@ async function handleForgotPassword(e) {
     const confirmPassword = document.getElementById('confirmPassword').value;
 
     if (newPassword !== confirmPassword) {
-        showAlert('New passwords do not match', 'danger'); // Changed message type
+        showAlert('New passwords do not match', 'danger'); 
         return;
     }
 
@@ -163,8 +167,14 @@ async function handleForgotPassword(e) {
         });
 
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Password reset failed');
+            let errorText = 'Password reset failed';
+            try {
+                const errorData = await response.json();
+                errorText = errorData.message || Object.values(errorData).join(', ') || 'Password reset failed.';
+            } catch (jsonError) {
+                errorText = await response.text();
+            }
+            throw new Error(errorText);
         }
 
         showAlert('Password reset successful! Please login with your new password.', 'success');
@@ -181,41 +191,41 @@ async function handleForgotPassword(e) {
 }
 
 // Utility Functions
-function showAlert(message, type = 'info') {
+function showAlert(message, type = 'info') { 
     // Remove any existing alerts first
-    const existingAlert = document.querySelector('.auth-alert');
+    const existingAlert = document.querySelector('.auth-alert'); 
     if (existingAlert) {
-        existingAlert.remove();
+        existingAlert.remove(); 
     }
 
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `auth-alert alert alert-${type}`;
-    alertDiv.textContent = message;
+    const alertDiv = document.createElement('div'); 
+    alertDiv.className = `auth-alert alert alert-${type}`; 
+    alertDiv.textContent = message; 
     
-    const form = document.querySelector('form');
-    if (form) {
-        form.prepend(alertDiv);
-    }
+    // Attempt to prepend to the form, or fallback to body if no form
+    const form = document.querySelector('form'); 
+    const targetElement = form || document.body.querySelector('.card-body') || document.body;
+    targetElement.prepend(alertDiv);
 
-    setTimeout(() => {
-        alertDiv.remove();
+    setTimeout(() => { 
+        alertDiv.remove(); 
     }, 5000);
 }
 
-function showLoading(show) {
-    const buttons = document.querySelectorAll('form button[type="submit"]');
+function showLoading(show) { 
+    const buttons = document.querySelectorAll('form button[type="submit"]'); 
     buttons.forEach(button => {
-        button.disabled = show;
+        button.disabled = show; 
         button.innerHTML = show 
-            ? '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...'
-            : button.textContent;
+            ? '<span class="spinner-border spinner-border-sm" role="status"></span> Processing...' 
+            : button.textContent; 
     });
 }
 
-// Logout function
-function logoutUser() {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userId'); // Ensure userId is also cleared for consistency
-    window.location.href = '/auth/login.html';
+function logoutUser() { 
+    localStorage.removeItem('authToken'); 
+    localStorage.removeItem('userEmail'); 
+    localStorage.removeItem('userId'); 
+    localStorage.removeItem('userName'); 
+    window.location.href = '/auth/login.html'; 
 }

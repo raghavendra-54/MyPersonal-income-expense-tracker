@@ -1,4 +1,7 @@
-const API_BASE_URL = 'https://symmetrical-space-guacamole-pjrjqp9jr9773rg7p-8080.app.github.dev/api'; 
+// API Configuration - Use HTTPS for production
+// IMPORTANT: Replace this with your actual Codespaces public URL.
+// Example: 'https://your-codespace-name-8080.app.github.dev/api'
+const API_BASE_URL = 'https://curly-space-telegram-69g974w9g5qqc5xrg-8080.app.github.dev/api'; 
 
 // User state management
 const currentUser = {
@@ -16,37 +19,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     const authToken = localStorage.getItem('authToken');
     const userEmail = localStorage.getItem('userEmail');
     const userId = localStorage.getItem('userId');
-    const userName = localStorage.getItem('userName'); // Now storing and retrieving full name
+    const userName = localStorage.getItem('userName'); 
 
     console.log('DOMContentLoaded: Checking auth state.');
     console.log('  authToken:', authToken ? 'Present' : 'Missing');
     console.log('  userEmail:', userEmail);
     console.log('  userId:', userId);
-    console.log('  userName:', userName); // Debug log for userName
+    console.log('  userName:', userName); 
 
     // If on an auth page, allow it to load without immediate redirect
     if (window.location.pathname.includes('/auth/')) {
-        if (authToken && userEmail && userId && userName) { // Check all necessary items
+        if (authToken && userEmail && userId && userName) { 
             console.log('  Already logged in on auth page, redirecting to index.html.');
             window.location.href = '/index.html';
         }
-        return; // Stop further execution for auth pages
+        return; 
     }
     
     // For non-auth pages, check authentication
-    if (!authToken || !userEmail || !userId || !userName) { // Ensure all needed details are present
+    if (!authToken || !userEmail || !userId || !userName) {
         console.log('  Missing auth details on non-auth page. Logging out.');
-        logoutUser(); // This will clear partial data and redirect to login
+        logoutUser(); 
         return;
     }
 
     // Populate currentUser from localStorage immediately for UI updates
     currentUser.email = userEmail;
     currentUser.id = userId;
-    currentUser.name = userName; // Set name directly from localStorage
-    currentUser.isLoggedIn = true; // Mark as logged in if all localStorage items are present
+    currentUser.name = userName; 
+    currentUser.isLoggedIn = true; 
 
-    
+    // Directly initialize the app if localStorage contains necessary data
+    console.log('All required localStorage items found. Initializing app directly.');
+    initApp(); 
 });
 
 function initApp() {
@@ -70,7 +75,7 @@ function initApp() {
 
         if (!document.getElementById('logout-link')) {
             const logoutItem = document.createElement('li');
-            logoutItem.className = 'nav-item mt-auto'; // Push to bottom if flex-column
+            logoutItem.className = 'nav-item mt-auto'; 
             logoutItem.innerHTML = `<a class="nav-link" href="#" id="logout-link"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>`;
             sidebarNav.appendChild(logoutItem);
             document.getElementById('logout-link').addEventListener('click', (e) => { e.preventDefault(); logoutUser(); });
@@ -97,7 +102,7 @@ function initApp() {
 
 // Function to update the welcome message on the dashboard
 function updateWelcomeMessage() {
-    const welcomeElement = document.getElementById('welcome-message');
+    const welcomeElement = document.getElementById('welcome-message'); 
     if (welcomeElement) {
         welcomeElement.textContent = `Welcome, ${currentUser.name}`;
     }
@@ -107,7 +112,7 @@ function logoutUser() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userId');
-    localStorage.removeItem('userName'); // Clear userName
+    localStorage.removeItem('userName'); 
     currentUser.email = null;
     currentUser.name = 'Guest';
     currentUser.isLoggedIn = false;
@@ -122,7 +127,7 @@ async function loadPage(page) {
         return;
     }
 
-    if (contentArea) { // Check if contentArea exists before manipulating
+    if (contentArea) { 
         contentArea.innerHTML = `<div class="text-center mt-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
     }
 
@@ -146,7 +151,6 @@ async function loadPage(page) {
         default:
             await loadDashboard();
     }
-    // Update active class for sidebar links
     document.querySelectorAll('.sidebar .nav-link').forEach(link => {
         link.classList.remove('active');
     });
@@ -184,17 +188,15 @@ async function fetchWithAuth(url, options = {}) {
             throw new Error('Unauthorized');
         }
 
-        // Check if response is JSON, if not, parse as text for error messages
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
-             return response; // Return the response object to be parsed by caller
+             return response; 
         } else {
             const errorText = await response.text();
             throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorText}`);
         }
     } catch (error) {
         console.error('API Error:', error);
-        // Only show alert if it's not an "Unauthorized" error which is handled by logoutUser()
         if (error.message && !error.message.includes('Unauthorized') && !error.message.includes('Failed to fetch')) {
             alert(`API Error: ${error.message}. Please check console for details.`);
         } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
@@ -296,7 +298,7 @@ async function loadDashboard() {
 
     } catch (error) {
         console.error('Error loading dashboard:', error);
-        if (error.message !== 'Unauthorized') {
+        if (error.message && !error.message.includes('Unauthorized')) {
             contentArea.innerHTML = `<div class="alert alert-danger">Error loading dashboard data. ${error.message}</div>`;
         }
     }
@@ -549,7 +551,7 @@ function loadIncomeForm() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json(); // Assuming JSON error from backend
+                const errorData = await response.json(); 
                 throw new Error(errorData.message || 'Failed to add income');
             }
 
@@ -557,7 +559,7 @@ function loadIncomeForm() {
             loadDashboard();
         } catch (error) {
             console.error('Error:', error);
-            if (error.message !== 'Unauthorized') {
+            if (error.message && !error.message.includes('Unauthorized')) {
                 alert(`Error adding income: ${error.message}`);
             }
         }
@@ -632,7 +634,7 @@ function loadExpenseForm() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json(); // Assuming JSON error from backend
+                const errorData = await response.json(); 
                 throw new Error(errorData.message || 'Failed to add expense');
             }
 
@@ -640,7 +642,7 @@ function loadExpenseForm() {
             loadDashboard();
         } catch (error) {
             console.error('Error:', error);
-            if (error.message !== 'Unauthorized') {
+            if (error.message && !error.message.includes('Unauthorized')) {
                 alert(`Error adding expense: ${error.message}`);
             }
         }
@@ -877,7 +879,7 @@ async function editTransaction(id) {
         loadDashboard();
     } catch (error) {
         console.error('Error updating transaction:', error);
-        if (error.message !== 'Unauthorized') {
+        if (error.message && !error.message.includes('Unauthorized')) {
             alert(`Error updating transaction: ${error.message}`);
         }
     }
@@ -905,7 +907,7 @@ async function deleteTransaction(id) {
             loadDashboard();
         } catch (error) {
             console.error('Error deleting transaction:', error);
-            if (error.message !== 'Unauthorized') {
+            if (error.message && !error.message.includes('Unauthorized')) {
                 alert(`Error deleting transaction: ${error.message}`);
             }
         }
@@ -959,8 +961,7 @@ async function loadProfilePage() {
     }
 
     try {
-        // MODIFIED: Use currentUser.id to fetch profile
-        const response = await fetchWithAuth(`${API_BASE_URL}/users/${currentUser.id}`); // Fetch by ID
+        const response = await fetchWithAuth(`${API_BASE_URL}/users/${currentUser.id}`); 
         if (!response.ok) {
             if (response.status === 404) {
                 throw new Error('User profile not found. Please try registering again.');
@@ -970,7 +971,6 @@ async function loadProfilePage() {
         }
         const userProfile = await response.json();
 
-        // Populate form fields with fetched data
         contentArea.innerHTML = `
             <div class="row justify-content-center">
                 <div class="col-md-8">
@@ -1027,7 +1027,6 @@ async function loadProfilePage() {
                 </div>
             </div>
         `;
-        // Set the selected value for the position dropdown after content is rendered
         document.getElementById('profilePosition').value = userProfile.position;
 
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
@@ -1048,11 +1047,10 @@ async function loadProfilePage() {
                 phone: document.getElementById('profilePhone').value,
                 position: document.getElementById('profilePosition').value,
                 address: document.getElementById('profileAddress').value,
-                password: newPassword // Will be empty string if not changed
+                password: newPassword 
             };
 
             try {
-                // Use currentUser.id for the PUT request to update profile
                 const updateResponse = await fetchWithAuth(`${API_BASE_URL}/users/${currentUser.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -1066,16 +1064,15 @@ async function loadProfilePage() {
 
                 const updatedUser = await updateResponse.json();
                 alert('Profile updated successfully!');
-                // Update localStorage and currentUser state if email/name changes
                 localStorage.setItem('userEmail', updatedUser.email);
                 localStorage.setItem('userName', `${updatedUser.firstName} ${updatedUser.lastName}`);
                 currentUser.email = updatedUser.email;
                 currentUser.name = `${updatedUser.firstName} ${updatedUser.lastName}`;
-                updateWelcomeMessage(); // Call to refresh welcome message
-                loadDashboard(); // Reload dashboard to reflect changes
+                updateWelcomeMessage(); 
+                loadDashboard(); 
             } catch (error) {
                 console.error('Error updating profile:', error);
-                if (error.message !== 'Unauthorized') {
+                if (error.message && !error.message.includes('Unauthorized')) {
                     alert(`Error updating profile: ${error.message}`);
                 }
             }
@@ -1083,7 +1080,7 @@ async function loadProfilePage() {
 
     } catch (error) {
         console.error('Error loading profile page:', error);
-        if (error.message !== 'Unauthorized') {
+        if (error.message && !error.message.includes('Unauthorized')) {
             contentArea.innerHTML = `<div class="alert alert-danger">Error loading user profile: ${error.message}</div>`;
         }
     }

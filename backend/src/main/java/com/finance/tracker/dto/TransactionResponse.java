@@ -16,5 +16,4 @@ public class TransactionResponse {
     private LocalDate date;
     private TransactionType type;
     private String category;
-    // No User object here to avoid serialization issues
 }

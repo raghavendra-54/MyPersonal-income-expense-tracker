@@ -14,13 +14,13 @@
     }
   },
   "postCreateCommand": "sudo apt-get update && sudo apt-get install -y maven && java -version && mvn -version",
-  "forwardPorts": [8080], // Explicitly forward port 8080
+  "forwardPorts": [8080], 
   "portsAttributes": {
     "8080": {
       "label": "Application Port",
-      "onAutoForward": "notify", // or "openBrowser" if you want it to open automatically
-      "protocol": "http", // Your application uses HTTP
-      "visibility": "public" // Set to public permanently
+      "onAutoForward": "notify", 
+      "protocol": "http", 
+      "visibility": "public" 
     }
   }
 }
