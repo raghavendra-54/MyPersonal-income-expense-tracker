@@ -1,32 +1,17 @@
-# First stage: Build the application
-FROM openjdk:17-jdk-slim AS builder
-
-# Set the working directory inside the container
+# Build stage
+FROM maven:3.8.6-openjdk-17 AS build
 WORKDIR /app
+# Copy from backend folder in your repo
+COPY backend/pom.xml .
+COPY backend/src ./src
+COPY backend/.mvn ./.mvn
+COPY backend/mvnw .
+# Build
+RUN ./mvnw clean package -DskipTests
 
-# Copy the Maven wrapper and project files first
-COPY mvnw .
-COPY .mvn ./.mvn
-COPY pom.xml .
-COPY src ./src
-
-# Make the Maven wrapper executable
-RUN chmod +x mvnw
-
-# Run Maven commands
-RUN ./mvnw clean install -DskipTests
-
-# Second stage: Create the final image
-FROM openjdk:17-jdk-slim
-
-# Set the working directory
+# Run stage
+FROM openjdk:17
 WORKDIR /app
-
-# Copy the built JAR file from the 'builder' stage
-COPY --from=builder /app/target/tracker-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose the port your application runs on
+COPY --from=build /app/target/tracker-*.jar app.jar
 EXPOSE 8080
-
-# Command to run the application
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
