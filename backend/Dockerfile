@@ -1,21 +1,18 @@
 # First stage: Build the application
 FROM openjdk:17-jdk-slim AS builder
 
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy only the pom.xml first to download dependencies and create cache layer
-COPY pom.xml .
-
-# Download dependencies
-RUN ./mvnw dependency:go-offline
-
-# Copy the rest of the project files
-COPY src ./src
+# Copy the Maven wrapper and project files first
 COPY mvnw .
 COPY .mvn ./.mvn
+COPY pom.xml .
 
-# Make the Maven wrapper executable and run the build
+# Make the Maven wrapper executable
 RUN chmod +x mvnw
+
+# Run Maven commands
 RUN ./mvnw clean install -DskipTests
 
 # Second stage: Create the final image
