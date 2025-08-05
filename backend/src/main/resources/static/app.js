@@ -1,7 +1,4 @@
-// API Configuration - Use HTTPS for production
-// IMPORTANT: Replace this with your actual Codespaces public URL.
-// Example: 'https://your-codespace-name-8080.app.github.dev/api'
-const API_BASE_URL = 'https://curly-space-telegram-69g974w9g5qqc5xrg-8080.app.github.dev/api'; 
+const API_BASE_URL = 'https://mypersonal-income-expense-tracker.com/api'; 
 
 // User state management
 const currentUser = {
