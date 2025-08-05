@@ -16,10 +16,9 @@ RUN chmod +x mvnw
 # Build the application using Maven
 RUN ./mvnw clean install -DskipTests
 
-# The JAR file is created in the target directory
-# Find the JAR file and copy it to the container
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
+# Copy the built JAR file from the target directory to the container
+# The 'target' folder is created inside '/app' by the previous RUN command
+COPY target/tracker-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose the port your application runs on
 EXPOSE 8080
