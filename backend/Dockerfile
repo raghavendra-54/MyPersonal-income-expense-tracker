@@ -1,5 +1,5 @@
 # Build stage - Use valid Maven image
-FROM maven:3.8.6-jdk-17 AS build  # Changed this line
+FROM maven:3.8.6-jdk-17 AS build
 WORKDIR /app
 COPY backend/pom.xml .
 COPY backend/src ./src
@@ -8,7 +8,7 @@ COPY backend/mvnw .
 RUN ./mvnw clean package -DskipTests
 
 # Run stage
-FROM openjdk:17-jdk-slim  # More lightweight
+FROM openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=build /app/target/tracker-*.jar app.jar
 EXPOSE 8080
