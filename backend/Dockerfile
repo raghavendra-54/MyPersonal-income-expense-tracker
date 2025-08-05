@@ -3,8 +3,13 @@ FROM openjdk:17-jdk-slim AS builder
 
 WORKDIR /app
 
-# Copy the Maven wrapper and project files
+# Copy only the pom.xml first to download dependencies and create cache layer
 COPY pom.xml .
+
+# Download dependencies
+RUN ./mvnw dependency:go-offline
+
+# Copy the rest of the project files
 COPY src ./src
 COPY mvnw .
 COPY .mvn ./.mvn
