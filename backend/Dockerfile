@@ -1,6 +1,7 @@
 # First stage: Build the application
 FROM openjdk:17-jdk-slim AS builder
 
+# Set the working directory inside the container
 WORKDIR /app
 
 # Copy the Maven wrapper and project files first
@@ -9,8 +10,10 @@ COPY .mvn ./.mvn
 COPY pom.xml .
 COPY src ./src
 
-# Make the Maven wrapper executable and run the build
+# Make the Maven wrapper executable
 RUN chmod +x mvnw
+
+# Run Maven commands
 RUN ./mvnw clean install -DskipTests
 
 # Second stage: Create the final image
