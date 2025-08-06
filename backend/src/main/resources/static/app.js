@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://mypersonal-income-expense-tracker.com/api'; 
+const API_BASE_URL = 'https://income-expense-backend-sxnj.onrender.com/api'; 
 
 // User state management
 const currentUser = {
