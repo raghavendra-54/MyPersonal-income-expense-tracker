@@ -1,9 +1,20 @@
 # Build stage
 FROM maven:3.8.7-eclipse-temurin-17 AS build
 WORKDIR /app
-# Copy specific backend files
-COPY backend/pom.xml ./pom.xml
+
+# Copy the backend project files from the 'backend' directory
+COPY backend/pom.xml .
 COPY backend/src ./src
+
+# Make sure the frontend files are also in the build context
+COPY ./index.html ./src/main/resources/static/
+COPY ./login.html ./src/main/resources/static/auth/
+COPY ./register.html ./src/main/resources/static/auth/
+COPY ./forgot-password.html ./src/main/resources/static/auth/
+COPY ./css ./src/main/resources/static/css/
+COPY ./js ./src/main/resources/static/js/
+
+# Run the Maven build
 RUN mvn clean package -DskipTests
 
 # Run stage
@@ -13,15 +24,6 @@ WORKDIR /app
 # Copy the built JAR file
 COPY --from=build /app/target/*.jar app.jar
 
-# Copy frontend static files into the container
-# Assuming your frontend files are in the root directory and subfolders
-COPY ./index.html ./static/
-COPY ./login.html ./static/auth/
-COPY ./register.html ./static/auth/
-COPY ./forgot-password.html ./static/auth/
-COPY ./css ./static/css/
-COPY ./js ./static/js/
-
-# Expose the port your application runs on
+# Expose the port
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
