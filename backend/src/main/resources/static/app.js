@@ -1,6 +1,6 @@
-// API Configuration - Use HTTPS for production
 const API_BASE_URL = 'https://refactored-disco-4jw7547jw5q3qg5p-8080.app.github.dev/api'; 
 
+// User state management
 const currentUser = {
     email: null,
     name: 'Guest',
@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('  userId:', userId);
     console.log('  userName:', userName);
 
+    // Scenario 1: User is already logged in (localStorage has all items)
     if (authToken && userEmail && userId && userName) {
         currentUser.email = userEmail;
         currentUser.id = userId;
@@ -42,6 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return; 
         }
     } 
+    // Scenario 2: User is NOT logged in (missing localStorage items)
     else {
         if (!isOnAuthPage) {
             console.log('  Not logged in and not on auth page. Redirecting to login.html.');
@@ -165,40 +167,41 @@ async function fetchWithAuth(url, options = {}) {
     };
 
     try {
-        const response = await fetch(url, { 
-            ...options,
-            headers,
-            credentials: 'omit'
-        });
+    const response = await fetch(url, { 
+        ...options,
+        headers,
+        credentials: 'omit'
+    });
 
-        if (response.status === 401 || response.status === 403) {
-            if (!window.location.pathname.includes('/auth/login.html')) {
-                alert('Session expired. Please log in again.');
-                logoutUser();
-            }
-            throw new Error('Unauthorized');
+    if (response.status === 401 || response.status === 403) {
+        if (!window.location.pathname.includes('/auth/login.html')) {
+            alert('Session expired. Please log in again.');
+            logoutUser();
         }
-
-        if (!response.ok) {
-            let errorText = 'API Error';
-            try {
-                errorText = await response.text(); 
-            } catch (e) {
-                // Ignore if response body is empty
-            }
-            throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorText}`);
-        }
-
-        return response;
-    } catch (error) {
-        console.error('API Error:', error);
-        if (error.message && !error.message.includes('Unauthorized') && !error.message.includes('Failed to fetch')) {
-            alert(`API Error: ${error.message}. Please check console for details.`);
-        } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-            alert('Network error. Could not connect to the server. Please check your internet connection or server status.');
-        }
-        throw error;
+        throw new Error('Unauthorized');
     }
+
+    // Only throw an error if the response status is not a success (200-299)
+    if (!response.ok) {
+        let errorText = 'API Error';
+        try {
+            errorText = await response.text(); // Try to get the error message text
+        } catch (e) {
+            // Ignore if response body is empty
+        }
+        throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return response; // Return the response object for all successful statuses
+} catch (error) {
+    console.error('API Error:', error);
+    if (error.message && !error.message.includes('Unauthorized') && !error.message.includes('Failed to fetch')) {
+        alert(`API Error: ${error.message}. Please check console for details.`);
+    } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        alert('Network error. Could not connect to the server. Please check your internet connection or server status.');
+    }
+    throw error;
+}
 }
 
 async function loadDashboard() {
@@ -285,9 +288,10 @@ async function loadDashboard() {
             </div>
         `;
         
+        // This ensures updateWelcomeMessage and data loading happens *after* the browser has parsed the new elements.
         updateWelcomeMessage();
 
-        setTimeout(async () => {
+        window.requestAnimationFrame(async () => {
             try {
                 await loadSummaryData();
                 await initExpenseChart();
@@ -295,15 +299,17 @@ async function loadDashboard() {
                 await loadRecentTransactions();
             } catch (error) {
                 console.error('Error in deferred dashboard data loading:', error);
-                const dashboardArea = document.querySelector('#content-area .row');
+                // If dashboard still spins, the error likely comes from here.
+                // Display a user-friendly error message on the dashboard itself.
+                const dashboardArea = document.querySelector('#content-area .row'); // Select a relevant area
                 if (dashboardArea) {
                     dashboardArea.innerHTML = `<div class="alert alert-danger text-center">Failed to load dashboard data. Please try again.</div>`;
                 }
             }
-        }, 0);
+        });
 
     } catch (error) {
-        console.error('Error setting up dashboard HTML:', error);
+        console.error('Error setting up dashboard HTML:', error); // This catches errors related to setting contentArea.innerHTML
         if (contentArea) {
             contentArea.innerHTML = `<div class="alert alert-danger">Error loading dashboard layout. ${error.message}</div>`;
         }
@@ -327,7 +333,7 @@ async function loadSummaryData() {
         if (incomeElement) incomeElement.textContent = `Error`;
         if (expenseElement) expenseElement.textContent = `Error`;
         if (balanceElement) balanceElement.textContent = `Error`;
-        throw error;
+        throw error; // Re-throw to propagate to the calling requestAnimationFrame catch
     }
 }
 
@@ -377,7 +383,7 @@ async function initExpenseChart() {
         console.error('Error initializing expense chart:', error);
         const chartContainer = document.getElementById('expenseChart') ? document.getElementById('expenseChart').closest('.chart-container') : null;
         if (chartContainer) chartContainer.innerHTML = '<div class="alert alert-warning text-center">Failed to load expense chart data.</div>';
-        throw error;
+        throw error; // Re-throw to propagate
     }
 }
 
@@ -446,7 +452,7 @@ async function initMonthlyChart() {
         console.error('Error initializing monthly chart:', error);
         const chartContainer = document.getElementById('monthlyChart') ? document.getElementById('monthlyChart').closest('.chart-container') : null;
         if (chartContainer) chartContainer.innerHTML = '<div class="alert alert-warning text-center">Failed to load monthly chart data.</div>';
-        throw error;
+        throw error; // Re-throw to propagate
     }
 }
 
@@ -493,7 +499,7 @@ async function loadRecentTransactions() {
                 </tr>
             `;
         }
-        throw error;
+        throw error; // Re-throw to propagate
     }
 }
 
@@ -772,7 +778,7 @@ async function loadTransactions() {
 
         try {
             const response = await fetchWithAuth(exportUrl);
-            
+
             if (!response.ok) {
                 throw new Error(`Server responded with status ${response.status}`);
             }
@@ -786,7 +792,7 @@ async function loadTransactions() {
             }
 
             const blob = await response.blob();
-            
+
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.style.display = 'none';
@@ -796,7 +802,7 @@ async function loadTransactions() {
             a.click();
             window.URL.revokeObjectURL(url);
             a.remove();
-            
+
             console.log("Download successfully initiated.");
         } catch (error) {
             console.error('Error during export:', error);
@@ -878,6 +884,7 @@ async function filterTransactions() {
 
 async function editTransaction(id) {
     try {
+        // Fetch all transactions to find the one to edit (less efficient but works for small datasets)
         const allTransactionsResponse = await fetchWithAuth(`${API_BASE_URL}/transactions`);
         if (!allTransactionsResponse.ok) throw new Error('Failed to fetch transactions for edit lookup');
         const allTransactions = await allTransactionsResponse.json();
@@ -894,13 +901,13 @@ async function editTransaction(id) {
         const newDate = prompt('Enter new date (YYYY-MM-DD):', transactionToEdit.date);
 
         if (newTitle === null || newAmount === null || newCategory === null || newDate === null) {
-            return;
+            return; // User cancelled
         }
 
         const updatedTransactionData = {
             title: newTitle,
             amount: parseFloat(newAmount),
-            type: transactionToEdit.type,
+            type: transactionToEdit.type, // Keep original type
             category: newCategory,
             date: newDate
         };
@@ -917,17 +924,13 @@ async function editTransaction(id) {
         }
 
         const updatedTransaction = await updateResponse.json();
-        alert('Profile updated successfully!');
-        localStorage.setItem('userEmail', updatedUser.email);
-        localStorage.setItem('userName', `${updatedUser.firstName} ${updatedUser.lastName}`);
-        currentUser.email = updatedUser.email;
-        currentUser.name = `${updatedUser.firstName} ${updatedUser.lastName}`;
-        updateWelcomeMessage(); 
-        loadDashboard(); 
+        alert('Transaction updated successfully!');
+        loadAllTransactions(); // Refresh transaction list
+        loadDashboard(); // Refresh dashboard summary/charts
     } catch (error) {
-        console.error('Error updating profile:', error);
+        console.error('Error updating transaction:', error);
         if (error.message && !error.message.includes('Unauthorized')) {
-            alert(`Error updating profile: ${error.message}`);
+            alert(`Error updating transaction: ${error.message}`);
         }
     }
 }
@@ -1003,7 +1006,7 @@ function showCustomConfirm(message, onConfirm) {
 }
 
 async function loadProfilePage() {
-    if (!currentUser.isLoggedIn) {
+    if (!currentUser.isLoggedIn) { 
         contentArea.innerHTML = `<div class="alert alert-warning text-center">Please log in to view your profile.</div>`;
         return;
     }
@@ -1140,7 +1143,7 @@ function showDeveloperContact() {
         "Developer Contact Information:\n\n" +
         "Name: Raghavendra Gattu\n" +
         "Email: gatturaghava.edu123@gmail.com\n" +
-        "LinkedIn: linkedin.com/in/raghavendra-gattu-7b8b20235\n" +
+        "LinkedIn: www.linkedin.com/in/raghavendra-gattu\n" +
         "GitHub: github.com/Raghavendra-54\n" +
         "Project: MyPersonal-income-expense-tracker"
     );
