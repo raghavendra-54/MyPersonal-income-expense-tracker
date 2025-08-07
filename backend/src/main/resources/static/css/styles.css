@@ -16,6 +16,7 @@ body {
     padding: 0;
     min-height: 100vh;
     position: relative;
+    display: flex;
 }
 
 /* Auth Page Specific Styles */
@@ -86,12 +87,7 @@ body {
     z-index: 1000;
     display: flex;
     flex-direction: column;
-}
-
-.sidebar .position-sticky {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    width: 16.66666667%;
 }
 
 .sidebar h4 {
@@ -127,11 +123,12 @@ body {
 
 
 /* Main Content Area */
-main {
-    margin-left: 16.66666667%; /* Offset for col-md-2 sidebar */
-    width: 83.33333333%; /* Corresponding width */
+.main {
+    margin-left: 16.66666667%; /* Offset for sidebar */
+    width: 83.33333333%; /* Remaining width */
     background-color: #f5f7fa;
     min-height: 100vh;
+    padding: 1rem 1rem; /* Add padding to main content */
 }
 
 /* Card Styling */
@@ -266,83 +263,47 @@ main {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    /* Hide the desktop sidebar on mobile */
     .sidebar {
-        /* This is the fix: collapse sidebar into a bottom navigation bar */
+        display: none;
+    }
+    
+    /* Make the main content full width on mobile */
+    .main {
+        margin-left: 0;
+        width: 100%;
+        padding-bottom: 80px;
+    }
+    
+    /* Add a fixed bottom navigation bar for mobile */
+    .mobile-navbar {
+        display: flex;
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
-        height: auto;
-        padding-top: 0;
-        padding-bottom: 10px;
-        flex-direction: row; /* Change to horizontal */
+        background-color: var(--dark-color);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
         justify-content: space-around;
-        box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        background: linear-gradient(90deg, #2b2d42 0%, #1a1a2e 100%);
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 5px 0;
     }
 
-    .sidebar .position-sticky {
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-        height: auto;
-    }
-
-    .sidebar h4 {
-        display: none;
-    }
-    
-    .nav {
-        flex-direction: row;
-        width: 100%;
-        justify-content: space-around;
-        padding: 0;
-    }
-    
-    .nav-item {
-        flex: 1;
+    .mobile-navbar .nav-link {
+        color: rgba(255, 255, 255, 0.8);
         text-align: center;
-    }
-
-    .nav-link {
-        border-left: none;
-        border-top: 3px solid transparent;
         padding: 10px 5px;
-        font-size: 0.85rem;
         flex-direction: column;
-    }
-    
-    .nav-link i {
-        margin-right: 0 !important;
-        margin-bottom: 5px;
+        border-top: 3px solid transparent;
     }
 
-    .nav-link:hover, .nav-link.active {
-        border-left: none;
+    .mobile-navbar .nav-link i {
+        margin: 0;
+    }
+    
+    .mobile-navbar .nav-link:hover, .mobile-navbar .nav-link.active {
         border-top-color: var(--info-color);
-        transform: translateY(0);
-    }
-    
-    .nav-item.mt-auto {
-        margin-top: 0 !important;
-        padding-bottom: 0;
-    }
-
-    main {
-        /* This is the fix: remove the left margin and make content full width */
-        margin-left: 0;
-        width: 100%;
-        padding-bottom: 80px; /* Add padding at the bottom for the fixed mobile navbar */
-    }
-
-    .chart-container {
-        height: 250px;
-    }
-
-    .summary-card .card-text {
-        font-size: 1.8rem;
+        color: white;
+        background-color: rgba(255, 255, 255, 0.15);
     }
 }
