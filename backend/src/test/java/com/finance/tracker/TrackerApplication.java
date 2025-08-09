@@ -15,6 +15,7 @@ public class TrackerApplication {
 
     public static void main(String[] args) {
         startH2Server();
+        
         SpringApplication.run(TrackerApplication.class, args);
     }
 
@@ -25,5 +26,9 @@ public class TrackerApplication {
                 "-tcpPort", "8080",
                 "-baseDir", "./data", 
                 "-ifNotExists"    
-            ).start()
-```
+            ).start();
+    @GetMapping("/health")
+    public String healthCheck() {
+        return "OK";
+    }
+    }
