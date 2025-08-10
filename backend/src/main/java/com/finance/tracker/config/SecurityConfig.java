@@ -92,7 +92,6 @@ public class SecurityConfig {
                 .requestMatchers("/favicon.ico").permitAll()
                 .requestMatchers("/api/auth/**").permitAll() 
                 .requestMatchers("/", "/index.html", "/app.js", "/css/**", "/js/**", "/auth/**", "/assets/**").permitAll() 
-                .requestMatchers("/h2-console/**").permitAll() 
                 .anyRequest().authenticated() 
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) 
@@ -100,7 +99,6 @@ public class SecurityConfig {
             .formLogin(AbstractHttpConfigurer::disable) 
             .addFilterBefore(authenticationTokenFilter(), org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class); 
 
-        http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())); 
 
         return http.build();
     }
