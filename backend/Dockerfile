@@ -5,14 +5,18 @@ COPY pom.xml .
 COPY src ./src
 RUN mvn clean install -DskipTests
 
-# Stage 2: Create a lean image for running the application
+# ... (keep all the build steps above the final FROM)
+# Use a lean base image for the final stage
 FROM openjdk:17-jdk-slim
-WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
-# Remove these lines:
-# ENV SPRING_DATASOURCE_URL=${DATABASE_URL}
-# ENV SPRING_DATASOURCE_USERNAME=${PGUSER}
-# ENV SPRING_DATASOURCE_PASSWORD=${PGPASSWORD}
 
+# Set the working directory
+WORKDIR /app
+
+# Copy the packaged JAR file from the builder stage
+COPY --from=builder /app/target/*.jar app.jar
+
+# Expose the application port
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# The command to run the application, passing the database URL as a command-line argument
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.datasource.url=${DATABASE_URL}", "--spring.datasource.username=${PGUSER}", "--spring.datasource.password=${PGPASSWORD}"]
