@@ -1,5 +1,4 @@
-const API_BASE_URL = 'https://mypersonal-income-expense-tracker-production.up.railway.app/api'; 
-
+const API_BASE_URL = 'https://mypersonal-income-expense-tracker-production.up.railway.app/api';
 // Initialize when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     initializeAuthForms();
