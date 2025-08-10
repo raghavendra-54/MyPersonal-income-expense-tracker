@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://refactored-disco-4jw7547jw5q3qg5p-8080.app.github.dev/api'; 
+const API_BASE_URL = 'https://mypersonal-income-expense-tracker-production.up.railway.app/api'; 
 
 // Initialize when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
