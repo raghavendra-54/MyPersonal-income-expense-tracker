@@ -9,17 +9,10 @@ RUN mvn clean install -DskipTests
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
+# Remove these lines:
+# ENV SPRING_DATASOURCE_URL=${DATABASE_URL}
+# ENV SPRING_DATASOURCE_USERNAME=${PGUSER}
+# ENV SPRING_DATASOURCE_PASSWORD=${PGPASSWORD}
 
-# Explicitly set the database connection environment variables
-# These variable names must match the placeholders in your application.properties
-ENV SPRING_DATASOURCE_URL=${DATABASE_URL}
-ENV SPRING_DATASOURCE_USERNAME=${PGUSER}
-ENV SPRING_DATASOURCE_PASSWORD=${PGPASSWORD}
-
-# Expose the port your application listens on
 EXPOSE 8080
-
-# ... (keep all the build steps)
-# ...
-# The command to run the application, explicitly passing the database variables
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.datasource.url=${DATABASE_URL}", "--spring.datasource.username=${PGUSER}", "--spring.datasource.password=${PGPASSWORD}"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
