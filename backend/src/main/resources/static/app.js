@@ -1,4 +1,4 @@
-const API_BASE_URL = 'mypersonal-income-expense-tracker-production.up.railway.app/api'; 
+const API_BASE_URL = 'https://mypersonal-income-expense-tracker-production.up.railway.app/api'; 
 
 // User state management
 const currentUser = {
