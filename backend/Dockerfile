@@ -19,5 +19,7 @@ ENV SPRING_DATASOURCE_PASSWORD=${PGPASSWORD}
 # Expose the port your application listens on
 EXPOSE 8080
 
-# The command to run the application when the container starts
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# ... (keep all the build steps)
+# ...
+# The command to run the application, explicitly passing the database variables
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.datasource.url=${DATABASE_URL}", "--spring.datasource.username=${PGUSER}", "--spring.datasource.password=${PGPASSWORD}"]
