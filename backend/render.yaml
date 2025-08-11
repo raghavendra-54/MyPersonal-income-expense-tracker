@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: finance-tracker
+    env: java
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -Dserver.port=$PORT -jar target/tracker-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: finance-tracker-db
+          property: connectionString
+      - key: DATABASE_DRIVER
+        value: org.postgresql.Driver
+      - key: DATABASE_PLATFORM
+        value: org.hibernate.dialect.PostgreSQLDialect
+      - key: SHOW_SQL
+        value: false
+      - key: H2_CONSOLE_ENABLED
+        value: false
+
+databases:
+  - name: finance-tracker-db
+    databaseName: finance_tracker
+    user: finance_user

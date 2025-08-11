@@ -57,6 +57,14 @@
             <version>8.0.1.Final</version>
         </dependency>
 
+        <!-- PostgreSQL for production deployment -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- H2 for development -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
