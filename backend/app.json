@@ -1,0 +1,41 @@
+{
+  "name": "Personal Finance Tracker",
+  "description": "A comprehensive personal finance tracking application built with Spring Boot",
+  "repository": "https://github.com/your-username/finance-tracker-app",
+  "logo": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/icons/cash-stack.svg",
+  "keywords": ["java", "spring-boot", "finance", "tracker", "postgresql"],
+  "env": {
+    "DATABASE_DRIVER": {
+      "description": "Database driver class",
+      "value": "org.postgresql.Driver"
+    },
+    "DATABASE_PLATFORM": {
+      "description": "Hibernate dialect for PostgreSQL",
+      "value": "org.hibernate.dialect.PostgreSQLDialect"
+    },
+    "SHOW_SQL": {
+      "description": "Show SQL queries in logs",
+      "value": "false"
+    },
+    "H2_CONSOLE_ENABLED": {
+      "description": "Enable H2 console",
+      "value": "false"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:hobby-dev"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/java"
+    }
+  ]
+}
