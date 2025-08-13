@@ -27,7 +27,8 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: url('https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop') center/cover;
+    background: linear-gradient(135deg, rgba(67, 97, 238, 0.9), rgba(63, 55, 201, 0.9)), 
+                url('https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop') center/cover;
     padding: 20px;
 }
 
@@ -399,14 +400,13 @@ main {
     }
     
     .mobile-nav {
-        display: flex;
-        justify-content: space-around;
+        display: block;
     }
 
     main {
         margin-left: 0;
         width: 100%;
-        padding: 80px 0.5rem 80px;
+        padding: 80px 0.5rem 80px 0.5rem;
     }
 
     .auth-card .card-body {
@@ -441,7 +441,7 @@ main {
 
 @media (max-width: 576px) {
     main {
-        padding: 80px 0.25rem 80px;
+        padding: 80px 0.25rem 80px 0.25rem;
     }
 
     .summary-card .card-text {
