@@ -11,20 +11,20 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Mobile Header -->
-            <div class="mobile-header">
-                <div class="d-flex">
-                    <h5>Finance Tracker</h5>
+            <div class="mobile-header d-lg-none">
+                <div class="d-flex justify-content-between align-items-center w-100 px-3">
+                    <h5 class="mb-0">Finance Tracker</h5>
                     <div class="dropdown">
-                        <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-three-dots-vertical"></i>
+                        <button class="btn dropdown-toggle p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical fs-4"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#profile" id="mobile-profile-link">
-                                <i class="bi bi-person"></i>Profile
+                            <li><a class="dropdown-item" href="profile.html">
+                                <i class="bi bi-person me-2"></i>Profile
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" id="mobile-logout-link">
-                                <i class="bi bi-box-arrow-right"></i>Logout
+                            <li><a class="dropdown-item" href="#">
+                                <i class="bi bi-box-arrow-right me-2"></i>Logout
                             </a></li>
                         </ul>
                     </div>
@@ -32,37 +32,37 @@
             </div>
 
             <!-- Desktop Sidebar -->
-            <nav class="col-md-2 sidebar bg-dark text-white vh-100">
+            <nav class="col-md-2 sidebar bg-dark text-white vh-100 d-none d-lg-block">
                 <div class="position-sticky pt-3">
                     <h4 class="text-center mb-4">Finance Tracker</h4>
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" href="#dashboard" id="dashboard-link">
+                            <a class="nav-link" href="index.html">
                                 <i class="bi bi-speedometer2 me-2"></i>Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#income" id="income-link">
+                            <a class="nav-link" href="#income">
                                 <i class="bi bi-cash-stack me-2"></i>Add Income
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#expense" id="expense-link">
+                            <a class="nav-link" href="#expense">
                                 <i class="bi bi-cart me-2"></i>Add Expense
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#transactions" id="transactions-link">
+                            <a class="nav-link" href="#transactions">
                                 <i class="bi bi-list-ul me-2"></i>Transactions
                             </a>
                         </li>
                         <li class="nav-item mt-auto">
-                            <a class="nav-link active" href="#profile" id="profile-link">
+                            <a class="nav-link active" href="profile.html">
                                 <i class="bi bi-person me-2"></i>Profile
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" id="logout-link">
+                            <a class="nav-link" href="#">
                                 <i class="bi bi-box-arrow-right me-2"></i>Logout
                             </a>
                         </li>
@@ -71,42 +71,42 @@
             </nav>
 
             <!-- Mobile Bottom Navigation -->
-            <nav class="mobile-nav">
-                <ul class="nav">
+            <nav class="mobile-nav d-lg-none">
+                <ul class="nav justify-content-around">
                     <li class="nav-item">
-                        <a class="nav-link" href="#dashboard" id="mobile-dashboard-link">
-                            <i class="bi bi-speedometer2"></i>
-                            Dashboard
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-speedometer2 d-block mx-auto mb-1"></i>
+                            <span class="d-block">Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#income" id="mobile-income-link">
-                            <i class="bi bi-cash-stack"></i>
-                            Income
+                        <a class="nav-link" href="#income">
+                            <i class="bi bi-cash-stack d-block mx-auto mb-1"></i>
+                            <span class="d-block">Income</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#expense" id="mobile-expense-link">
-                            <i class="bi bi-cart"></i>
-                            Expense
+                        <a class="nav-link" href="#expense">
+                            <i class="bi bi-cart d-block mx-auto mb-1"></i>
+                            <span class="d-block">Expense</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#transactions" id="mobile-transactions-link">
-                            <i class="bi bi-list-ul"></i>
-                            History
+                        <a class="nav-link" href="#transactions">
+                            <i class="bi bi-list-ul d-block mx-auto mb-1"></i>
+                            <span class="d-block">History</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="#profile" id="mobile-profile-bottom-link">
-                            <i class="bi bi-person"></i>
-                            Profile
+                        <a class="nav-link active" href="profile.html">
+                            <i class="bi bi-person d-block mx-auto mb-1"></i>
+                            <span class="d-block">Profile</span>
                         </a>
                     </li>
                 </ul>
             </nav>
 
-            <main class="col-md-10 ms-sm-auto px-md-4 py-4">
+            <main class="col-md-10 ms-sm-auto px-md-4 py-4 main-content">
                 <div id="content-area">
                     <div class="text-center mt-5">
                         <div class="spinner-border" role="status">
