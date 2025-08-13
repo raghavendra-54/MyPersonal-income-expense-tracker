@@ -27,8 +27,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, rgba(67, 97, 238, 0.9), rgba(63, 55, 201, 0.9)), 
-                url('https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop') center/cover;
+    background: url('https://images.pexels.com/photos/6693653/pexels-photo-6693653.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') center/cover;
     padding: 20px;
 }
 
@@ -57,29 +56,6 @@ body {
     text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
-/* Custom Alert for Auth Forms */
-.auth-alert {
-    margin-bottom: 15px; 
-    border-radius: 8px;
-    padding: 12px 20px;
-    font-size: 0.95rem;
-    animation: fadeIn 0.5s ease-out; 
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Spinner for Loading Buttons */
-.spinner-border-sm {
-    width: 1rem;
-    height: 1rem;
-    border-width: 0.2em;
-    vertical-align: middle; 
-    margin-right: 8px; 
-}
-
 /* Desktop Sidebar */
 .sidebar {
     background: linear-gradient(135deg, #2b2d42 0%, #1a1a2e 100%);
@@ -93,7 +69,6 @@ body {
     display: flex; 
     flex-direction: column;
     width: 16.66666667%;
-    transition: all 0.3s ease;
 }
 
 .sidebar .position-sticky {
@@ -143,13 +118,12 @@ body {
 }
 
 /* Main Content Area */
-main {
+.main-content {
     margin-left: 16.66666667%; 
     width: 83.33333333%; 
     background-color: #f5f7fa;
     min-height: 100vh; 
     padding: 1rem;
-    transition: all 0.3s ease;
 }
 
 /* Mobile Header */
@@ -161,14 +135,8 @@ main {
     right: 0;
     background: linear-gradient(135deg, #2b2d42 0%, #1a1a2e 100%);
     color: white;
-    padding: 1rem;
     z-index: 1001;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.mobile-header .d-flex {
-    align-items: center;
-    justify-content: space-between;
 }
 
 .mobile-header h5 {
@@ -181,7 +149,6 @@ main {
     background: none;
     border: none;
     color: white;
-    font-size: 1.2rem;
     padding: 0.5rem;
 }
 
@@ -189,7 +156,6 @@ main {
     background: linear-gradient(135deg, #2b2d42 0%, #1a1a2e 100%);
     border: none;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    margin-top: 0.5rem;
 }
 
 .mobile-header .dropdown-item {
@@ -209,138 +175,6 @@ main {
     text-align: center;
 }
 
-/* Card Styling */
-.card {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin-bottom: 1rem;
-}
-
-.card:hover {
-    transform: translateY(-3px); 
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.summary-card {
-    border-left: 5px solid; 
-    border-radius: 10px; 
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-}
-
-.summary-card .card-body {
-    padding: 15px; 
-}
-
-.summary-card .card-title {
-    font-size: 1.1rem; 
-    margin-bottom: 10px;
-    font-weight: 500;
-}
-
-.summary-card .card-text {
-    font-size: 2.2rem; 
-    font-weight: 700;
-    color: var(--dark-color); 
-}
-
-.income-card {
-    border-left-color: var(--success-color);
-}
-
-.expense-card {
-    border-left-color: var(--danger-color);
-}
-
-.balance-card {
-    border-left-color: var(--primary-color);
-}
-
-/* Button Styling */
-.btn-primary {
-    background-color: var(--primary-color);
-    border: none;
-    border-radius: 8px; 
-    padding: 10px 20px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-    background-color: var(--secondary-color);
-    transform: translateY(-2px); 
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.btn-outline-primary, .btn-outline-success, .btn-outline-secondary, .btn-outline-danger {
-    border-radius: 8px;
-    font-weight: 500;
-}
-
-.btn-outline-primary:hover { background-color: var(--primary-color); color: white; }
-.btn-outline-success:hover { background-color: var(--success-color); color: white; }
-.btn-outline-secondary:hover { background-color: var(--secondary-color); color: white; }
-.btn-outline-danger:hover { background-color: var(--danger-color); color: white; }
-
-/* Chart Containers */
-.chart-container {
-    position: relative;
-    height: 350px; 
-    width: 100%;
-    margin: auto;
-}
-
-/* Form Controls */
-.form-control, .form-select {
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    padding: 10px 15px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
-    outline: none; 
-}
-
-/* Table Styling */
-.table {
-    border-radius: 10px;
-    overflow: hidden; 
-}
-
-.table thead th {
-    background-color: var(--info-color); 
-    color: white;
-    font-weight: 600;
-    padding: 12px 15px;
-    border-bottom: none; 
-}
-
-.table tbody tr {
-    transition: background-color 0.2s ease;
-}
-
-.table tbody tr:hover {
-    background-color: #e9ecef; 
-}
-
-.table-success {
-    background-color: rgba(76, 201, 240, 0.1); 
-    border-left: 3px solid var(--success-color);
-}
-
-.table-danger {
-    background-color: rgba(247, 37, 133, 0.1); 
-    border-left: 3px solid var(--danger-color);
-}
-
 /* Mobile Bottom Navigation */
 .mobile-nav {
     display: none;
@@ -354,12 +188,6 @@ main {
     z-index: 1000;
 }
 
-.mobile-nav .nav {
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-}
-
 .mobile-nav .nav-link {
     color: rgba(255, 255, 255, 0.8);
     text-align: center;
@@ -369,14 +197,10 @@ main {
     transition: all 0.3s ease;
     flex-direction: column;
     font-size: 0.75rem;
-    min-width: 50px;
-    flex: 1;
-    max-width: 80px;
 }
 
 .mobile-nav .nav-link i {
     font-size: 1.2rem;
-    margin-right: 0;
     margin-bottom: 0.25rem;
     display: block;
 }
@@ -385,114 +209,38 @@ main {
 .mobile-nav .nav-link.active {
     color: white;
     background-color: rgba(255, 255, 255, 0.15);
-    transform: none;
-    border-left: none;
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .sidebar {
         display: none;
     }
     
     .mobile-header {
-        display: block;
+        display: flex;
     }
     
     .mobile-nav {
         display: block;
     }
 
-    main {
+    .main-content {
         margin-left: 0;
         width: 100%;
         padding: 80px 0.5rem 80px 0.5rem;
     }
-
-    .auth-card .card-body {
-        padding: 20px;
-    }
-
-    .chart-container {
-        height: 250px;
-    }
-
-    .summary-card .card-text {
-        font-size: 1.8rem;
-    }
-
-    .table-responsive {
-        font-size: 0.875rem;
-    }
-
-    .btn {
-        padding: 8px 16px;
-        font-size: 0.875rem;
-    }
-
-    .card-body {
-        padding: 1rem;
-    }
-
-    .row.g-3 > .col-md-4 {
-        margin-bottom: 1rem;
-    }
-}
-
-@media (max-width: 576px) {
-    main {
-        padding: 80px 0.25rem 80px 0.25rem;
-    }
-
-    .summary-card .card-text {
-        font-size: 1.5rem;
-    }
-
-    .chart-container {
-        height: 200px;
-    }
-
-    .mobile-nav .nav-link {
-        font-size: 0.7rem;
-        min-width: 45px;
-    }
-
-    .mobile-nav .nav-link i {
-        font-size: 1rem;
-    }
-
-    .btn {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-    }
 }
 
 /* Tablet adjustments */
-@media (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 768px) and (max-width: 992px) {
     .sidebar {
         width: 200px;
     }
     
-    main {
+    .main-content {
         margin-left: 200px;
         width: calc(100% - 200px);
-    }
-    
-    .sidebar h4 {
-        font-size: 1rem;
-    }
-    
-    .nav-link {
-        padding: 10px 12px;
-        font-size: 0.9rem;
-    }
-}
-
-/* Large screens */
-@media (min-width: 1200px) {
-    .container-fluid {
-        max-width: 1400px;
-        margin: 0 auto;
     }
 }
 
@@ -504,14 +252,9 @@ main {
         display: none !important;
     }
     
-    main {
+    .main-content {
         margin-left: 0 !important;
         width: 100% !important;
         padding-top: 0 !important;
-    }
-    
-    .card {
-        box-shadow: none;
-        border: 1px solid #ddd;
     }
 }
