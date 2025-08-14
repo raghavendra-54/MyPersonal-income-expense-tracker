@@ -183,6 +183,13 @@ main {
     color: white;
     font-size: 1.2rem;
     padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.mobile-header .dropdown-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 .mobile-header .dropdown-menu {
@@ -190,12 +197,18 @@ main {
     border: none;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     margin-top: 0.5rem;
+    min-width: 200px;
 }
 
 .mobile-header .dropdown-item {
     color: rgba(255, 255, 255, 0.8);
     padding: 0.75rem 1rem;
     transition: all 0.3s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
 }
 
 .mobile-header .dropdown-item:hover {
