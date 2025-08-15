@@ -55,9 +55,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 function initApp() {
     console.log('App initialized. User is logged in.');
 
+    // Set up navigation and mobile menu from the updated code
     setupNavigation();
     setupMobileMenu();
     
+    // Load initial page
     const initialHash = window.location.hash.substring(1);
     loadPage(initialHash || 'dashboard');
 }
@@ -110,38 +112,46 @@ function setupMobileMenu() {
 }
 
 function setupNavigation() {
+    // Dashboard
     document.getElementById('dashboard-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         loadPage('dashboard');
     });
     
+    // Add Income
     document.getElementById('income-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         loadPage('income');
     });
     
+    // Add Expense
     document.getElementById('expense-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         loadPage('expense');
     });
     
+    // Transactions
     document.getElementById('transactions-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         loadPage('transactions');
     });
     
+    // Profile
     document.getElementById('profile-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         loadPage('profile');
     });
     
+    // Developer Contact
     document.getElementById('contact-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         loadPage('contact');
     });
     
+    // Logout
     document.getElementById('logout-link')?.addEventListener('click', (e) => {
         e.preventDefault();
+        // Using custom confirm modal from the updated code
         showCustomConfirm('Are you sure you want to logout?', () => {
             logoutUser();
         });
@@ -155,14 +165,9 @@ async function loadPage(page) {
         return;
     }
 
-    // Only show spinner for pages that require data fetching
-    const pagesWithData = ['dashboard', 'transactions', 'profile'];
-    if (pagesWithData.includes(page)) {
-        if (contentArea) { 
-            contentArea.innerHTML = `<div class="text-center mt-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
-        }
+    if (contentArea) { 
+        contentArea.innerHTML = `<div class="text-center mt-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
     }
-
 
     switch(page) {
         case 'dashboard':
@@ -181,7 +186,7 @@ async function loadPage(page) {
             await loadProfilePage();
             break;
         case 'contact':
-            showDeveloperContact();
+            showDeveloperContact(); // Using the new function
             break;
         default:
             await loadDashboard();
@@ -1146,6 +1151,7 @@ function showDeveloperContact() {
     );
 }
 
+// Utility functions from updated app.js
 function showAlert(message, type = 'info') {
     const existingAlerts = document.querySelectorAll('.alert');
     existingAlerts.forEach(alert => alert.remove());
