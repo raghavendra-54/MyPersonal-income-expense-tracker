@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'https://mypersonal-income-expense-tracker-production.up.railway.app/api';
+const API_BASE_URL = window.location.origin + '/api';
 
 // User state management
 const currentUser = {
@@ -222,7 +222,6 @@ async function fetchWithAuth(url, options = {}) {
 
         if (response.status === 401 || response.status === 403) {
             if (!window.location.pathname.includes('/auth/login.html')) {
-                // Using custom alert from the updated code
                 showAlert('Session expired. Please log in again.', 'danger');
                 logoutUser();
             }
