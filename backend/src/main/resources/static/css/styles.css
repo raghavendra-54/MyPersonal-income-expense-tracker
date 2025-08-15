@@ -325,7 +325,7 @@ main {
     main {
         margin-left: 0;
         width: 100%;
-        padding-top: 80px; /* Increased padding to account for fixed header */
+        padding-top: 60px; /* Increased padding to account for fixed header */
         padding-bottom: 20px; /* Added bottom padding */
     }
     
@@ -335,7 +335,7 @@ main {
         top: 0;
         left: 0;
         right: 0;
-        height: 60px;
+        height: 40px;
         background: linear-gradient(135deg, #2b2d42 0%, #1a1a2e 100%);
         color: white;
         display: flex;
