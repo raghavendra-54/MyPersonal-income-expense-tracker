@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check authentication first
     if (!isAuthenticated()) {
         console.log('User not authenticated, redirecting to login');
-        // Use a standard URL, not a relative path that might fail depending on the server setup
         window.location.href = '/auth/login.html';
         return;
     }
@@ -27,7 +26,7 @@ function initializeApp() {
     // Set up navigation
     setupNavigation();
     
-    // Set up mobile menu
+    // Set up mobile menu from updated code
     setupMobileMenu();
     
     // Load initial view (dashboard)
@@ -37,29 +36,26 @@ function initializeApp() {
     console.log('App initialized successfully');
 }
 
+// Function to handle mobile menu logic (from updated app.js)
 function setupMobileMenu() {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('mobileOverlay');
     
     if (mobileMenuBtn && sidebar && overlay) {
-        // Toggle menu
         mobileMenuBtn.addEventListener('click', () => {
             sidebar.classList.toggle('show');
             overlay.classList.toggle('show');
         });
         
-        // Close menu when overlay is clicked
         overlay.addEventListener('click', () => {
             sidebar.classList.remove('show');
             overlay.classList.remove('show');
         });
         
-        // Close menu when a nav link is clicked (mobile only)
         const navLinks = document.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
-                // Use a check for the 'show' class to determine if the menu is open
                 if (sidebar.classList.contains('show')) {
                     sidebar.classList.remove('show');
                     overlay.classList.remove('show');
@@ -69,72 +65,51 @@ function setupMobileMenu() {
     }
 }
 
+// Function to handle navigation and page loading (from updated app.js)
 function setupNavigation() {
-    // Dashboard
     document.getElementById('dashboard-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         showPage('dashboard');
     });
     
-    // Add Income
     document.getElementById('income-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         showPage('income');
     });
     
-    // Add Expense
     document.getElementById('expense-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         showPage('expense');
     });
     
-    // Transactions
     document.getElementById('transactions-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         showPage('transactions');
     });
     
-    // Profile
     document.getElementById('profile-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         showPage('profile');
     });
     
-    // Developer Contact
     document.getElementById('contact-link')?.addEventListener('click', (e) => {
         e.preventDefault();
         showPage('contact');
     });
     
-    // Logout
     document.getElementById('logout-link')?.addEventListener('click', (e) => {
         e.preventDefault();
-        // Use a custom modal instead of a native browser alert
         showCustomConfirm('Are you sure you want to logout?', () => {
             logoutUser();
         });
     });
 }
 
-function updateActiveNavigation(activeSection) {
-    // Remove active class from all nav links
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    
-    // Add active class to current section
-    const activeLink = document.getElementById(`${activeSection}-link`);
-    if (activeLink) {
-        activeLink.classList.add('active');
-    }
-}
-
-// Main page router function
+// Main page router function (from updated app.js)
 function showPage(page) {
     console.log(`app.js: showPage called for: ${page}`);
     const contentArea = document.getElementById('content-area');
 
-    // Show a loading spinner while the page content is being fetched/rendered
     if (contentArea) {
         contentArea.innerHTML = `
             <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
@@ -170,7 +145,17 @@ function showPage(page) {
     updateActiveNavigation(page);
 }
 
-// Authentication functions
+// Other functions are taken from the updated code to maintain consistency
+function updateActiveNavigation(activeSection) {
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    const activeLink = document.getElementById(`${activeSection}-link`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+}
+
 function isAuthenticated() {
     const token = localStorage.getItem('authToken');
     return token && token.trim() !== '';
@@ -192,11 +177,10 @@ function logoutUser() {
     window.location.href = '/auth/login.html';
 }
 
-// Dashboard functions
 async function showDashboard() {
-    const contentArea = document.getElementById('content-area');
     try {
         const userName = localStorage.getItem('userName') || 'User';
+        const contentArea = document.getElementById('content-area');
         contentArea.innerHTML = `
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Welcome, ${userName}!</h1>
@@ -265,7 +249,6 @@ async function showDashboard() {
 
 async function loadDashboardData() {
     try {
-        // Load summary data
         const summaryResponse = await fetch(`${API_BASE_URL}/transactions/summary`, {
             headers: getAuthHeaders()
         });
@@ -275,14 +258,9 @@ async function loadDashboardData() {
             document.getElementById('total-income').textContent = `₹${summary.totalIncome.toFixed(2)}`;
             document.getElementById('total-expense').textContent = `₹${summary.totalExpense.toFixed(2)}`;
             document.getElementById('balance').textContent = `₹${summary.balance.toFixed(2)}`;
-            
-            // Create chart
             createIncomeExpenseChart(summary.totalIncome, summary.totalExpense);
-        } else {
-            throw new Error('Failed to fetch summary data');
         }
         
-        // Load recent transactions
         const transactionsResponse = await fetch(`${API_BASE_URL}/transactions`, {
             headers: getAuthHeaders()
         });
@@ -290,33 +268,18 @@ async function loadDashboardData() {
         if (transactionsResponse.ok) {
             const transactions = await transactionsResponse.json();
             displayRecentTransactions(transactions.slice(0, 5));
-        } else {
-            throw new Error('Failed to fetch recent transactions');
         }
-        
     } catch (error) {
         console.error('Error loading dashboard data:', error);
-        // Display user-friendly error messages
-        document.getElementById('total-income').textContent = 'Error';
-        document.getElementById('total-expense').textContent = 'Error';
-        document.getElementById('balance').textContent = 'Error';
-        const recentTransactionsDiv = document.getElementById('recent-transactions');
-        if(recentTransactionsDiv) {
-             recentTransactionsDiv.innerHTML = '<p class="text-danger">Failed to load recent transactions.</p>';
-        }
-        showAlert(`Failed to load dashboard data: ${error.message}`, 'danger');
     }
 }
 
 function createIncomeExpenseChart(income, expense) {
     const ctx = document.getElementById('incomeExpenseChart');
     if (!ctx) return;
-    
-    // Destroy existing chart if it exists
     if (currentChart) {
         currentChart.destroy();
     }
-    
     currentChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -364,7 +327,6 @@ function displayRecentTransactions(transactions) {
     container.innerHTML = html;
 }
 
-// Add Income functions
 function showAddIncome() {
     const contentArea = document.getElementById('content-area');
     contentArea.innerHTML = `
@@ -407,17 +369,12 @@ function showAddIncome() {
             </div>
         </div>
     `;
-    
-    // Set today's date as default
     document.getElementById('incomeDate').value = new Date().toISOString().split('T')[0];
-    
-    // Add form submit handler
     document.getElementById('incomeForm').addEventListener('submit', handleIncomeSubmit);
 }
 
 async function handleIncomeSubmit(e) {
     e.preventDefault();
-    
     const formData = {
         title: document.getElementById('incomeTitle').value,
         amount: parseFloat(document.getElementById('incomeAmount').value),
@@ -425,14 +382,12 @@ async function handleIncomeSubmit(e) {
         type: 'INCOME',
         category: document.getElementById('incomeCategory').value
     };
-    
     try {
         const response = await fetch(`${API_BASE_URL}/transactions`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(formData)
         });
-        
         if (response.ok) {
             showAlert('Income added successfully!', 'success');
             document.getElementById('incomeForm').reset();
@@ -441,14 +396,12 @@ async function handleIncomeSubmit(e) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to add income');
         }
-        
     } catch (error) {
         console.error('Error adding income:', error);
         showAlert(error.message || 'Error adding income', 'danger');
     }
 }
 
-// Add Expense functions
 function showAddExpense() {
     const contentArea = document.getElementById('content-area');
     contentArea.innerHTML = `
@@ -493,17 +446,12 @@ function showAddExpense() {
             </div>
         </div>
     `;
-    
-    // Set today's date as default
     document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
-    
-    // Add form submit handler
     document.getElementById('expenseForm').addEventListener('submit', handleExpenseSubmit);
 }
 
 async function handleExpenseSubmit(e) {
     e.preventDefault();
-    
     const formData = {
         title: document.getElementById('expenseTitle').value,
         amount: parseFloat(document.getElementById('expenseAmount').value),
@@ -511,14 +459,12 @@ async function handleExpenseSubmit(e) {
         type: 'EXPENSE',
         category: document.getElementById('expenseCategory').value
     };
-    
     try {
         const response = await fetch(`${API_BASE_URL}/transactions`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(formData)
         });
-        
         if (response.ok) {
             showAlert('Expense added successfully!', 'success');
             document.getElementById('expenseForm').reset();
@@ -527,14 +473,12 @@ async function handleExpenseSubmit(e) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to add expense');
         }
-        
     } catch (error) {
         console.error('Error adding expense:', error);
         showAlert(error.message || 'Error adding expense', 'danger');
     }
 }
 
-// Transactions functions
 async function showTransactions() {
     const contentArea = document.getElementById('content-area');
     contentArea.innerHTML = `
@@ -544,7 +488,6 @@ async function showTransactions() {
                 <i class="bi bi-download me-1"></i>Export CSV
             </button>
         </div>
-        
         <div class="card mb-4">
             <div class="card-body">
                 <div class="row g-3">
@@ -570,14 +513,12 @@ async function showTransactions() {
                 </div>
             </div>
         </div>
-        
         <div class="card">
             <div class="card-body">
                 <div id="transactions-table">Loading...</div>
             </div>
         </div>
     `;
-    
     await loadTransactions();
 }
 
@@ -605,7 +546,6 @@ async function loadTransactions() {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to load transactions');
         }
-        
     } catch (error) {
         console.error('Error loading transactions:', error);
         const tableContainer = document.getElementById('transactions-table');
@@ -668,12 +608,10 @@ function displayTransactionsTable(transactions) {
 }
 
 async function editTransaction(id) {
-    // This would open an edit modal or form
     showAlert('Edit functionality coming soon!', 'info');
 }
 
 async function deleteTransaction(id) {
-    // Use a custom confirm modal instead of native browser confirm()
     showCustomConfirm('Are you sure you want to delete this transaction?', async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/transactions/${id}`, {
@@ -688,7 +626,6 @@ async function deleteTransaction(id) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to delete transaction');
             }
-            
         } catch (error) {
             console.error('Error deleting transaction:', error);
             showAlert(error.message || 'Error deleting transaction', 'danger');
@@ -729,14 +666,12 @@ async function exportTransactions() {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to export transactions');
         }
-        
     } catch (error) {
         console.error('Error exporting transactions:', error);
         showAlert(error.message || 'Error exporting transactions', 'danger');
     }
 }
 
-// Profile functions
 async function showProfile() {
     const contentArea = document.getElementById('content-area');
     contentArea.innerHTML = `
@@ -754,7 +689,6 @@ async function showProfile() {
             </div>
         </div>
     `;
-    
     await loadProfile();
 }
 
@@ -765,12 +699,10 @@ async function loadProfile() {
         logoutUser();
         return;
     }
-
     try {
         const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
             headers: getAuthHeaders()
         });
-        
         if (response.ok) {
             const user = await response.json();
             displayProfile(user);
@@ -778,7 +710,6 @@ async function loadProfile() {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to load profile');
         }
-        
     } catch (error) {
         console.error('Error loading profile:', error);
         document.getElementById('profile-content').innerHTML = `<p class="text-danger">${error.message || 'Error loading profile'}</p>`;
@@ -788,7 +719,6 @@ async function loadProfile() {
 function displayProfile(user) {
     const container = document.getElementById('profile-content');
     if (!container) return;
-    
     container.innerHTML = `
         <form id="profileForm">
             <div class="row mb-3">
@@ -820,13 +750,11 @@ function displayProfile(user) {
             <button type="submit" class="btn btn-primary">Update Profile</button>
         </form>
     `;
-    
     document.getElementById('profileForm').addEventListener('submit', handleProfileUpdate);
 }
 
 async function handleProfileUpdate(e) {
     e.preventDefault();
-    
     const userId = localStorage.getItem('userId');
     const formData = {
         firstName: document.getElementById('firstName').value,
@@ -836,44 +764,37 @@ async function handleProfileUpdate(e) {
         position: document.getElementById('position').value,
         address: document.getElementById('address').value
     };
-    
     try {
         const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
             body: JSON.stringify(formData)
         });
-        
         if (response.ok) {
             showAlert('Profile updated successfully!', 'success');
-            // Update stored user name
             localStorage.setItem('userName', `${formData.firstName} ${formData.lastName}`);
         } else {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to update profile');
         }
-        
     } catch (error) {
         console.error('Error updating profile:', error);
         showAlert(error.message || 'Error updating profile', 'danger');
     }
 }
 
-// Developer Contact functions
 function showDeveloperContact() {
     const contentArea = document.getElementById('content-area');
     contentArea.innerHTML = `
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Developer Contact</h1>
         </div>
-        
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-body text-center">
                         <h3 class="mb-4">Get in Touch</h3>
                         <p class="lead mb-4">Have questions or feedback about the Finance Tracker? I'd love to hear from you!</p>
-                        
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <div class="card h-100">
@@ -896,7 +817,6 @@ function showDeveloperContact() {
                                 </div>
                             </div>
                         </div>
-                        
                         <div class="mt-4">
                             <h5>About This Project</h5>
                             <p class="text-muted">
@@ -911,25 +831,18 @@ function showDeveloperContact() {
     `;
 }
 
-// Utility functions
+// Utility functions (from updated app.js)
 function showAlert(message, type = 'info') {
-    // Remove existing alerts
     const existingAlerts = document.querySelectorAll('.alert');
     existingAlerts.forEach(alert => alert.remove());
-    
-    // Create new alert
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
     alertDiv.innerHTML = `
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-    
-    // Insert at the top of content area
     const contentArea = document.getElementById('content-area');
     contentArea.insertBefore(alertDiv, contentArea.firstChild);
-    
-    // Auto-remove after 5 seconds
     setTimeout(() => {
         if (alertDiv.parentNode) {
             alertDiv.remove();
@@ -954,25 +867,20 @@ function showCustomConfirm(message, onConfirm) {
                         <button type="button" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
                     </div>
                 </div>
-                </div>
             </div>
         </div>
     `;
-
     const existingModal = document.getElementById('customConfirmModal');
     if (existingModal) {
         existingModal.remove();
     }
-
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     const confirmModal = new bootstrap.Modal(document.getElementById('customConfirmModal'));
     confirmModal.show();
-
     document.getElementById('confirmActionBtn').addEventListener('click', () => {
         onConfirm();
         confirmModal.hide();
     });
-
     document.getElementById('customConfirmModal').addEventListener('hidden.bs.modal', function (event) {
         this.remove();
     });
