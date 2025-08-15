@@ -155,9 +155,14 @@ async function loadPage(page) {
         return;
     }
 
-    if (contentArea) { 
-        contentArea.innerHTML = `<div class="text-center mt-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+    // Only show spinner for pages that require data fetching
+    const pagesWithData = ['dashboard', 'transactions', 'profile'];
+    if (pagesWithData.includes(page)) {
+        if (contentArea) { 
+            contentArea.innerHTML = `<div class="text-center mt-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+        }
     }
+
 
     switch(page) {
         case 'dashboard':
