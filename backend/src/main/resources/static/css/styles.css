@@ -262,7 +262,7 @@ main {
     border-left: 3px solid var(--danger-color);
 }
 
-/* Responsive adjustments */
+/* Mobile Responsive Design */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
@@ -327,7 +327,7 @@ main {
     main {
         margin-left: 0;
         width: 100%;
-        padding-top: 60px;
+        padding-top: 70px;
     }
     
     /* Mobile header */

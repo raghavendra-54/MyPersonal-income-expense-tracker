@@ -156,10 +156,11 @@ function logoutUser() {
 // Dashboard functions
 async function showDashboard() {
     try {
+        const userName = localStorage.getItem('userName') || 'User';
         const contentArea = document.getElementById('content-area');
         contentArea.innerHTML = `
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Dashboard</h1>
+                <h1 class="h2">Welcome, ${userName}!</h1>
             </div>
             
             <div class="row mb-4">
@@ -232,9 +233,9 @@ async function loadDashboardData() {
         
         if (summaryResponse.ok) {
             const summary = await summaryResponse.json();
-            document.getElementById('total-income').textContent = `$${summary.totalIncome.toFixed(2)}`;
-            document.getElementById('total-expense').textContent = `$${summary.totalExpense.toFixed(2)}`;
-            document.getElementById('balance').textContent = `$${summary.balance.toFixed(2)}`;
+            document.getElementById('total-income').textContent = `₹${summary.totalIncome.toFixed(2)}`;
+            document.getElementById('total-expense').textContent = `₹${summary.totalExpense.toFixed(2)}`;
+            document.getElementById('balance').textContent = `₹${summary.balance.toFixed(2)}`;
             
             // Create chart
             createIncomeExpenseChart(summary.totalIncome, summary.totalExpense);
@@ -303,7 +304,7 @@ function displayRecentTransactions(transactions) {
                 <small class="text-muted">${transaction.date}</small>
             </div>
             <span class="badge ${transaction.type === 'INCOME' ? 'bg-success' : 'bg-danger'}">
-                ${transaction.type === 'INCOME' ? '+' : '-'}$${transaction.amount.toFixed(2)}
+                ${transaction.type === 'INCOME' ? '+' : '-'}₹${transaction.amount.toFixed(2)}
             </span>
         </div>
     `).join('');
@@ -329,7 +330,7 @@ function showAddIncome() {
                                 <input type="text" class="form-control" id="incomeTitle" required>
                             </div>
                             <div class="mb-3">
-                                <label for="incomeAmount" class="form-label">Amount</label>
+                                <label for="incomeAmount" class="form-label">Amount (₹)</label>
                                 <input type="number" class="form-control" id="incomeAmount" step="0.01" min="0" required>
                             </div>
                             <div class="mb-3">
@@ -412,7 +413,7 @@ function showAddExpense() {
                                 <input type="text" class="form-control" id="expenseTitle" required>
                             </div>
                             <div class="mb-3">
-                                <label for="expenseAmount" class="form-label">Amount</label>
+                                <label for="expenseAmount" class="form-label">Amount (₹)</label>
                                 <input type="number" class="form-control" id="expenseAmount" step="0.01" min="0" required>
                             </div>
                             <div class="mb-3">
@@ -589,8 +590,11 @@ function displayTransactionsTable(transactions) {
                                     ${transaction.type}
                                 </span>
                             </td>
-                            <td>$${transaction.amount.toFixed(2)}</td>
+                            <td>₹${transaction.amount.toFixed(2)}</td>
                             <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="editTransaction(${transaction.id})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
                                 <button class="btn btn-sm btn-outline-danger" onclick="deleteTransaction(${transaction.id})">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -603,6 +607,11 @@ function displayTransactionsTable(transactions) {
     `;
     
     container.innerHTML = html;
+}
+
+async function editTransaction(id) {
+    // This would open an edit modal or form
+    showAlert('Edit functionality coming soon!', 'info');
 }
 
 async function deleteTransaction(id) {
@@ -778,12 +787,13 @@ async function handleProfileUpdate(e) {
             // Update stored user name
             localStorage.setItem('userName', `${formData.firstName} ${formData.lastName}`);
         } else {
-            throw new Error('Failed to update profile');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update profile');
         }
         
     } catch (error) {
         console.error('Error updating profile:', error);
-        showAlert('Error updating profile', 'danger');
+        showAlert(error.message || 'Error updating profile', 'danger');
     }
 }
 
