@@ -8,14 +8,15 @@ let currentUser = null;
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing app...');
-    
+
     // Check authentication first
     if (!isAuthenticated()) {
         console.log('User not authenticated, redirecting to login');
+        // Use a standard URL, not a relative path that might fail depending on the server setup
         window.location.href = '/auth/login.html';
         return;
     }
-    
+
     // Initialize the app
     initializeApp();
 });
@@ -30,7 +31,8 @@ function initializeApp() {
     setupMobileMenu();
     
     // Load initial view (dashboard)
-    showDashboard();
+    const initialHash = window.location.hash.substring(1) || 'dashboard';
+    showPage(initialHash);
     
     console.log('App initialized successfully');
 }
@@ -57,7 +59,8 @@ function setupMobileMenu() {
         const navLinks = document.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
+                // Use a check for the 'show' class to determine if the menu is open
+                if (sidebar.classList.contains('show')) {
                     sidebar.classList.remove('show');
                     overlay.classList.remove('show');
                 }
@@ -70,49 +73,46 @@ function setupNavigation() {
     // Dashboard
     document.getElementById('dashboard-link')?.addEventListener('click', (e) => {
         e.preventDefault();
-        showDashboard();
-        updateActiveNavigation('dashboard');
+        showPage('dashboard');
     });
     
     // Add Income
     document.getElementById('income-link')?.addEventListener('click', (e) => {
         e.preventDefault();
-        showAddIncome();
-        updateActiveNavigation('income');
+        showPage('income');
     });
     
     // Add Expense
     document.getElementById('expense-link')?.addEventListener('click', (e) => {
         e.preventDefault();
-        showAddExpense();
-        updateActiveNavigation('expense');
+        showPage('expense');
     });
     
     // Transactions
     document.getElementById('transactions-link')?.addEventListener('click', (e) => {
         e.preventDefault();
-        showTransactions();
-        updateActiveNavigation('transactions');
+        showPage('transactions');
     });
     
     // Profile
     document.getElementById('profile-link')?.addEventListener('click', (e) => {
         e.preventDefault();
-        showProfile();
-        updateActiveNavigation('profile');
+        showPage('profile');
     });
     
     // Developer Contact
     document.getElementById('contact-link')?.addEventListener('click', (e) => {
         e.preventDefault();
-        showDeveloperContact();
-        updateActiveNavigation('contact');
+        showPage('contact');
     });
     
     // Logout
     document.getElementById('logout-link')?.addEventListener('click', (e) => {
         e.preventDefault();
-        logoutUser();
+        // Use a custom modal instead of a native browser alert
+        showCustomConfirm('Are you sure you want to logout?', () => {
+            logoutUser();
+        });
     });
 }
 
@@ -127,6 +127,47 @@ function updateActiveNavigation(activeSection) {
     if (activeLink) {
         activeLink.classList.add('active');
     }
+}
+
+// Main page router function
+function showPage(page) {
+    console.log(`app.js: showPage called for: ${page}`);
+    const contentArea = document.getElementById('content-area');
+
+    // Show a loading spinner while the page content is being fetched/rendered
+    if (contentArea) {
+        contentArea.innerHTML = `
+            <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+    }
+
+    switch(page) {
+        case 'dashboard':
+            showDashboard();
+            break;
+        case 'income':
+            showAddIncome();
+            break;
+        case 'expense':
+            showAddExpense();
+            break;
+        case 'transactions':
+            showTransactions();
+            break;
+        case 'profile':
+            showProfile();
+            break;
+        case 'contact':
+            showDeveloperContact();
+            break;
+        default:
+            showDashboard();
+    }
+    updateActiveNavigation(page);
 }
 
 // Authentication functions
@@ -144,20 +185,18 @@ function getAuthHeaders() {
 }
 
 function logoutUser() {
-    if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('userName');
-        window.location.href = '/auth/login.html';
-    }
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
+    window.location.href = '/auth/login.html';
 }
 
 // Dashboard functions
 async function showDashboard() {
+    const contentArea = document.getElementById('content-area');
     try {
         const userName = localStorage.getItem('userName') || 'User';
-        const contentArea = document.getElementById('content-area');
         contentArea.innerHTML = `
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Welcome, ${userName}!</h1>
@@ -239,6 +278,8 @@ async function loadDashboardData() {
             
             // Create chart
             createIncomeExpenseChart(summary.totalIncome, summary.totalExpense);
+        } else {
+            throw new Error('Failed to fetch summary data');
         }
         
         // Load recent transactions
@@ -249,10 +290,21 @@ async function loadDashboardData() {
         if (transactionsResponse.ok) {
             const transactions = await transactionsResponse.json();
             displayRecentTransactions(transactions.slice(0, 5));
+        } else {
+            throw new Error('Failed to fetch recent transactions');
         }
         
     } catch (error) {
         console.error('Error loading dashboard data:', error);
+        // Display user-friendly error messages
+        document.getElementById('total-income').textContent = 'Error';
+        document.getElementById('total-expense').textContent = 'Error';
+        document.getElementById('balance').textContent = 'Error';
+        const recentTransactionsDiv = document.getElementById('recent-transactions');
+        if(recentTransactionsDiv) {
+             recentTransactionsDiv.innerHTML = '<p class="text-danger">Failed to load recent transactions.</p>';
+        }
+        showAlert(`Failed to load dashboard data: ${error.message}`, 'danger');
     }
 }
 
@@ -386,12 +438,13 @@ async function handleIncomeSubmit(e) {
             document.getElementById('incomeForm').reset();
             document.getElementById('incomeDate').value = new Date().toISOString().split('T')[0];
         } else {
-            throw new Error('Failed to add income');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to add income');
         }
         
     } catch (error) {
         console.error('Error adding income:', error);
-        showAlert('Error adding income', 'danger');
+        showAlert(error.message || 'Error adding income', 'danger');
     }
 }
 
@@ -471,12 +524,13 @@ async function handleExpenseSubmit(e) {
             document.getElementById('expenseForm').reset();
             document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
         } else {
-            throw new Error('Failed to add expense');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to add expense');
         }
         
     } catch (error) {
         console.error('Error adding expense:', error);
-        showAlert('Error adding expense', 'danger');
+        showAlert(error.message || 'Error adding expense', 'danger');
     }
 }
 
@@ -548,12 +602,16 @@ async function loadTransactions() {
             const transactions = await response.json();
             displayTransactionsTable(transactions);
         } else {
-            throw new Error('Failed to load transactions');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to load transactions');
         }
         
     } catch (error) {
         console.error('Error loading transactions:', error);
-        document.getElementById('transactions-table').innerHTML = '<p class="text-danger">Error loading transactions</p>';
+        const tableContainer = document.getElementById('transactions-table');
+        if (tableContainer) {
+            tableContainer.innerHTML = `<p class="text-danger">${error.message || 'Error loading transactions'}</p>`;
+        }
     }
 }
 
@@ -615,27 +673,27 @@ async function editTransaction(id) {
 }
 
 async function deleteTransaction(id) {
-    if (!confirm('Are you sure you want to delete this transaction?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/transactions/${id}`, {
-            method: 'DELETE',
-            headers: getAuthHeaders()
-        });
-        
-        if (response.ok) {
-            showAlert('Transaction deleted successfully!', 'success');
-            await loadTransactions();
-        } else {
-            throw new Error('Failed to delete transaction');
+    // Use a custom confirm modal instead of native browser confirm()
+    showCustomConfirm('Are you sure you want to delete this transaction?', async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/transactions/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            
+            if (response.ok) {
+                showAlert('Transaction deleted successfully!', 'success');
+                await loadTransactions();
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to delete transaction');
+            }
+            
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+            showAlert(error.message || 'Error deleting transaction', 'danger');
         }
-        
-    } catch (error) {
-        console.error('Error deleting transaction:', error);
-        showAlert('Error deleting transaction', 'danger');
-    }
+    });
 }
 
 async function exportTransactions() {
@@ -668,12 +726,13 @@ async function exportTransactions() {
             
             showAlert('Transactions exported successfully!', 'success');
         } else {
-            throw new Error('Failed to export transactions');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to export transactions');
         }
         
     } catch (error) {
         console.error('Error exporting transactions:', error);
-        showAlert('Error exporting transactions', 'danger');
+        showAlert(error.message || 'Error exporting transactions', 'danger');
     }
 }
 
@@ -700,12 +759,14 @@ async function showProfile() {
 }
 
 async function loadProfile() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+        showAlert('User ID not found, please log in again.', 'danger');
+        logoutUser();
+        return;
+    }
+
     try {
-        const userId = localStorage.getItem('userId');
-        if (!userId) {
-            throw new Error('User ID not found');
-        }
-        
         const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
             headers: getAuthHeaders()
         });
@@ -714,12 +775,13 @@ async function loadProfile() {
             const user = await response.json();
             displayProfile(user);
         } else {
-            throw new Error('Failed to load profile');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to load profile');
         }
         
     } catch (error) {
         console.error('Error loading profile:', error);
-        document.getElementById('profile-content').innerHTML = '<p class="text-danger">Error loading profile</p>';
+        document.getElementById('profile-content').innerHTML = `<p class="text-danger">${error.message || 'Error loading profile'}</p>`;
     }
 }
 
@@ -873,4 +935,45 @@ function showAlert(message, type = 'info') {
             alertDiv.remove();
         }
     }, 5000);
+}
+
+function showCustomConfirm(message, onConfirm) {
+    const modalHtml = `
+        <div class="modal fade" id="customConfirmModal" tabindex="-1" aria-labelledby="customConfirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="customConfirmModalLabel">Confirm Action</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const existingModal = document.getElementById('customConfirmModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const confirmModal = new bootstrap.Modal(document.getElementById('customConfirmModal'));
+    confirmModal.show();
+
+    document.getElementById('confirmActionBtn').addEventListener('click', () => {
+        onConfirm();
+        confirmModal.hide();
+    });
+
+    document.getElementById('customConfirmModal').addEventListener('hidden.bs.modal', function (event) {
+        this.remove();
+    });
 }
