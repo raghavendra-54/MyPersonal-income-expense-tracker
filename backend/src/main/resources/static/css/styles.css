@@ -327,6 +327,7 @@ main {
     main {
         margin-left: 0;
         width: 100%;
+        /* FIX: Increased padding-top to ensure content is below the fixed header */
         padding-top: 80px; 
     }
     
