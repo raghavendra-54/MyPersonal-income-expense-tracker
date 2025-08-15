@@ -1,4 +1,5 @@
-const API_BASE_URL = 'https://finance-tracker-app-debk.onrender.com/api';
+// API Configuration
+const API_BASE_URL = 'https://mypersonal-income-expense-tracker-production.up.railway.app/api';
 
 // User state management
 const currentUser = {
@@ -26,7 +27,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('  userId:', userId);
     console.log('  userName:', userName);
 
-    // Scenario 1: User is already logged in (localStorage has all items)
     if (authToken && userEmail && userId && userName) {
         currentUser.email = userEmail;
         currentUser.id = userId;
@@ -42,9 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             initApp();
             return; 
         }
-    } 
-    // Scenario 2: User is NOT logged in (missing localStorage items)
-    else {
+    } else {
         if (!isOnAuthPage) {
             console.log('  Not logged in and not on auth page. Redirecting to login.html.');
             logoutUser(); 
@@ -56,41 +54,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function initApp() {
     console.log('App initialized. User is logged in.');
-    document.getElementById('dashboard-link').addEventListener('click', (e) => { e.preventDefault(); loadPage('dashboard'); });
-    document.getElementById('income-link').addEventListener('click', (e) => { e.preventDefault(); loadPage('income'); });
-    document.getElementById('expense-link').addEventListener('click', (e) => { e.preventDefault(); loadPage('expense'); });
-    document.getElementById('transactions-link').addEventListener('click', (e) => { e.preventDefault(); loadPage('transactions'); });
+
+    // Set up navigation and mobile menu from the updated code
+    setupNavigation();
+    setupMobileMenu();
     
-    const sidebarNav = document.querySelector('.sidebar .nav');
-    if (sidebarNav) {
-        if (!document.getElementById('profile-link')) {
-            const profileItem = document.createElement('li');
-            profileItem.className = 'nav-item';
-            profileItem.innerHTML = `<a class="nav-link" href="#profile" id="profile-link"><i class="bi bi-person-circle me-2"></i>Profile</a>`;
-            sidebarNav.appendChild(profileItem);
-            document.getElementById('profile-link').addEventListener('click', (e) => { e.preventDefault(); loadPage('profile'); });
-        }
-
-        if (!document.getElementById('logout-link')) {
-            const logoutItem = document.createElement('li');
-            logoutItem.className = 'nav-item mt-auto'; 
-            logoutItem.innerHTML = `<a class="nav-link" href="#" id="logout-link"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>`;
-            sidebarNav.appendChild(logoutItem);
-            document.getElementById('logout-link').addEventListener('click', (e) => { e.preventDefault(); logoutUser(); });
-        }
-    }
-
-    if (sidebarNav && !document.getElementById('developer-contact-link')) {
-        const devContactItem = document.createElement('li');
-        devContactItem.className = 'nav-item';
-        devContactItem.innerHTML = `<a class="nav-link" href="#" id="developer-contact-link"><i class="bi bi-info-circle me-2"></i>Contact Developer</a>`;
-        sidebarNav.appendChild(devContactItem);
-        document.getElementById('developer-contact-link').addEventListener('click', (e) => { 
-            e.preventDefault(); 
-            showDeveloperContact(); 
-        });
-    }
-
+    // Load initial page
     const initialHash = window.location.hash.substring(1);
     loadPage(initialHash || 'dashboard');
 }
@@ -112,6 +81,81 @@ function logoutUser() {
     currentUser.isLoggedIn = false;
     currentUser.id = null;
     window.location.href = '/auth/login.html';
+}
+
+function setupMobileMenu() {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    
+    if (mobileMenuBtn && sidebar && overlay) {
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        });
+        
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+        });
+        
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (sidebar.classList.contains('show')) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                }
+            });
+        });
+    }
+}
+
+function setupNavigation() {
+    // Dashboard
+    document.getElementById('dashboard-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadPage('dashboard');
+    });
+    
+    // Add Income
+    document.getElementById('income-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadPage('income');
+    });
+    
+    // Add Expense
+    document.getElementById('expense-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadPage('expense');
+    });
+    
+    // Transactions
+    document.getElementById('transactions-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadPage('transactions');
+    });
+    
+    // Profile
+    document.getElementById('profile-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadPage('profile');
+    });
+    
+    // Developer Contact
+    document.getElementById('contact-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadPage('contact');
+    });
+    
+    // Logout
+    document.getElementById('logout-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Using custom confirm modal from the updated code
+        showCustomConfirm('Are you sure you want to logout?', () => {
+            logoutUser();
+        });
+    });
 }
 
 async function loadPage(page) {
@@ -141,6 +185,9 @@ async function loadPage(page) {
         case 'profile':
             await loadProfilePage();
             break;
+        case 'contact':
+            showDeveloperContact(); // Using the new function
+            break;
         default:
             await loadDashboard();
     }
@@ -167,41 +214,41 @@ async function fetchWithAuth(url, options = {}) {
     };
 
     try {
-    const response = await fetch(url, { 
-        ...options,
-        headers,
-        credentials: 'omit'
-    });
+        const response = await fetch(url, { 
+            ...options,
+            headers,
+            credentials: 'omit'
+        });
 
-    if (response.status === 401 || response.status === 403) {
-        if (!window.location.pathname.includes('/auth/login.html')) {
-            alert('Session expired. Please log in again.');
-            logoutUser();
+        if (response.status === 401 || response.status === 403) {
+            if (!window.location.pathname.includes('/auth/login.html')) {
+                // Using custom alert from the updated code
+                showAlert('Session expired. Please log in again.', 'danger');
+                logoutUser();
+            }
+            throw new Error('Unauthorized');
         }
-        throw new Error('Unauthorized');
-    }
 
-    // Only throw an error if the response status is not a success (200-299)
-    if (!response.ok) {
-        let errorText = 'API Error';
-        try {
-            errorText = await response.text(); // Try to get the error message text
-        } catch (e) {
-            // Ignore if response body is empty
+        if (!response.ok) {
+            let errorText = 'API Error';
+            try {
+                errorText = await response.text();
+            } catch (e) {
+                // Ignore if response body is empty
+            }
+            throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorText}`);
         }
-        throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorText}`);
-    }
 
-    return response; // Return the response object for all successful statuses
-} catch (error) {
-    console.error('API Error:', error);
-    if (error.message && !error.message.includes('Unauthorized') && !error.message.includes('Failed to fetch')) {
-        alert(`API Error: ${error.message}. Please check console for details.`);
-    } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        alert('Network error. Could not connect to the server. Please check your internet connection or server status.');
+        return response;
+    } catch (error) {
+        console.error('API Error:', error);
+        if (error.message && !error.message.includes('Unauthorized') && !error.message.includes('Failed to fetch')) {
+             showAlert(`API Error: ${error.message}. Please check console for details.`, 'danger');
+        } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+             showAlert('Network error. Could not connect to the server. Please check your internet connection or server status.', 'danger');
+        }
+        throw error;
     }
-    throw error;
-}
 }
 
 async function loadDashboard() {
@@ -288,7 +335,6 @@ async function loadDashboard() {
             </div>
         `;
         
-        // This ensures updateWelcomeMessage and data loading happens *after* the browser has parsed the new elements.
         updateWelcomeMessage();
 
         window.requestAnimationFrame(async () => {
@@ -299,9 +345,7 @@ async function loadDashboard() {
                 await loadRecentTransactions();
             } catch (error) {
                 console.error('Error in deferred dashboard data loading:', error);
-                // If dashboard still spins, the error likely comes from here.
-                // Display a user-friendly error message on the dashboard itself.
-                const dashboardArea = document.querySelector('#content-area .row'); // Select a relevant area
+                const dashboardArea = document.querySelector('#content-area .row');
                 if (dashboardArea) {
                     dashboardArea.innerHTML = `<div class="alert alert-danger text-center">Failed to load dashboard data. Please try again.</div>`;
                 }
@@ -309,7 +353,7 @@ async function loadDashboard() {
         });
 
     } catch (error) {
-        console.error('Error setting up dashboard HTML:', error); // This catches errors related to setting contentArea.innerHTML
+        console.error('Error setting up dashboard HTML:', error);
         if (contentArea) {
             contentArea.innerHTML = `<div class="alert alert-danger">Error loading dashboard layout. ${error.message}</div>`;
         }
@@ -333,7 +377,7 @@ async function loadSummaryData() {
         if (incomeElement) incomeElement.textContent = `Error`;
         if (expenseElement) expenseElement.textContent = `Error`;
         if (balanceElement) balanceElement.textContent = `Error`;
-        throw error; // Re-throw to propagate to the calling requestAnimationFrame catch
+        throw error;
     }
 }
 
@@ -383,7 +427,7 @@ async function initExpenseChart() {
         console.error('Error initializing expense chart:', error);
         const chartContainer = document.getElementById('expenseChart') ? document.getElementById('expenseChart').closest('.chart-container') : null;
         if (chartContainer) chartContainer.innerHTML = '<div class="alert alert-warning text-center">Failed to load expense chart data.</div>';
-        throw error; // Re-throw to propagate
+        throw error;
     }
 }
 
@@ -452,7 +496,7 @@ async function initMonthlyChart() {
         console.error('Error initializing monthly chart:', error);
         const chartContainer = document.getElementById('monthlyChart') ? document.getElementById('monthlyChart').closest('.chart-container') : null;
         if (chartContainer) chartContainer.innerHTML = '<div class="alert alert-warning text-center">Failed to load monthly chart data.</div>';
-        throw error; // Re-throw to propagate
+        throw error;
     }
 }
 
@@ -499,7 +543,7 @@ async function loadRecentTransactions() {
                 </tr>
             `;
         }
-        throw error; // Re-throw to propagate
+        throw error;
     }
 }
 
@@ -526,6 +570,7 @@ function loadIncomeForm() {
                             <div class="mb-3">
                                 <label for="incomeCategory" class="form-label">Category</label>
                                 <select class="form-select" id="incomeCategory" required>
+                                    <option value="">Select Category</option>
                                     <option value="SALARY">Salary</option>
                                     <option value="BONUS">Bonus</option>
                                     <option value="FREELANCE">Freelance</option>
@@ -571,12 +616,12 @@ function loadIncomeForm() {
                 throw new Error(errorData.message || 'Failed to add income');
             }
 
-            alert('Income added successfully!');
+            showAlert('Income added successfully!', 'success');
             loadDashboard();
         } catch (error) {
             console.error('Error:', error);
             if (error.message && !error.message.includes('Unauthorized')) {
-                alert(`Error adding income: ${error.message}`);
+                showAlert(`Error adding income: ${error.message}`, 'danger');
             }
         }
     });
@@ -654,12 +699,12 @@ function loadExpenseForm() {
                 throw new Error(errorData.message || 'Failed to add expense');
             }
 
-            alert('Expense added successfully!');
+            showAlert('Expense added successfully!', 'success');
             loadDashboard();
         } catch (error) {
             console.error('Error:', error);
             if (error.message && !error.message.includes('Unauthorized')) {
-                alert(`Error adding expense: ${error.message}`);
+                showAlert(`Error adding expense: ${error.message}`, 'danger');
             }
         }
     });
@@ -806,7 +851,7 @@ async function loadTransactions() {
             console.log("Download successfully initiated.");
         } catch (error) {
             console.error('Error during export:', error);
-            alert(`Failed to export transactions: ${error.message}`);
+            showAlert(`Failed to export transactions: ${error.message}`, 'danger');
         }
     });
 
@@ -884,14 +929,13 @@ async function filterTransactions() {
 
 async function editTransaction(id) {
     try {
-        // Fetch all transactions to find the one to edit (less efficient but works for small datasets)
         const allTransactionsResponse = await fetchWithAuth(`${API_BASE_URL}/transactions`);
         if (!allTransactionsResponse.ok) throw new Error('Failed to fetch transactions for edit lookup');
         const allTransactions = await allTransactionsResponse.json();
         const transactionToEdit = allTransactions.find(t => t.id === id);
 
         if (!transactionToEdit) {
-            alert('Transaction not found or you do not have permission to edit it.');
+            showAlert('Transaction not found or you do not have permission to edit it.', 'danger');
             return;
         }
 
@@ -901,13 +945,13 @@ async function editTransaction(id) {
         const newDate = prompt('Enter new date (YYYY-MM-DD):', transactionToEdit.date);
 
         if (newTitle === null || newAmount === null || newCategory === null || newDate === null) {
-            return; // User cancelled
+            return;
         }
 
         const updatedTransactionData = {
             title: newTitle,
             amount: parseFloat(newAmount),
-            type: transactionToEdit.type, // Keep original type
+            type: transactionToEdit.type,
             category: newCategory,
             date: newDate
         };
@@ -924,13 +968,13 @@ async function editTransaction(id) {
         }
 
         const updatedTransaction = await updateResponse.json();
-        alert('Transaction updated successfully!');
-        loadAllTransactions(); // Refresh transaction list
-        loadDashboard(); // Refresh dashboard summary/charts
+        showAlert('Transaction updated successfully!', 'success');
+        loadAllTransactions();
+        loadDashboard();
     } catch (error) {
         console.error('Error updating transaction:', error);
         if (error.message && !error.message.includes('Unauthorized')) {
-            alert(`Error updating transaction: ${error.message}`);
+            showAlert(`Error updating transaction: ${error.message}`, 'danger');
         }
     }
 }
@@ -952,56 +996,15 @@ async function deleteTransaction(id) {
                 }
             }
 
-            alert('Transaction deleted successfully!');
+            showAlert('Transaction deleted successfully!', 'success');
             loadAllTransactions();
             loadDashboard();
         } catch (error) {
             console.error('Error deleting transaction:', error);
             if (error.message && !error.message.includes('Unauthorized')) {
-                alert(`Error deleting transaction: ${error.message}`);
+                showAlert(`Error deleting transaction: ${error.message}`, 'danger');
             }
         }
-    });
-}
-
-function showCustomConfirm(message, onConfirm) {
-    const modalHtml = `
-        <div class="modal fade" id="customConfirmModal" tabindex="-1" aria-labelledby="customConfirmModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="customConfirmModalLabel">Confirm Action</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        ${message}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
-                    </div>
-                </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    const existingModal = document.getElementById('customConfirmModal');
-    if (existingModal) {
-        existingModal.remove();
-    }
-
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    const confirmModal = new bootstrap.Modal(document.getElementById('customConfirmModal'));
-    confirmModal.show();
-
-    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-        onConfirm();
-        confirmModal.hide();
-    });
-
-    document.getElementById('customConfirmModal').addEventListener('hidden.bs.modal', function (event) {
-        this.remove();
     });
 }
 
@@ -1087,7 +1090,7 @@ async function loadProfilePage() {
             const confirmNewPassword = document.getElementById('profileConfirmPassword').value;
 
             if (newPassword && newPassword !== confirmNewPassword) {
-                alert('New password and confirm password do not match.');
+                showAlert('New password and confirm password do not match.', 'danger');
                 return;
             }
 
@@ -1114,7 +1117,7 @@ async function loadProfilePage() {
                 }
 
                 const updatedUser = await updateResponse.json();
-                alert('Profile updated successfully!');
+                showAlert('Profile updated successfully!', 'success');
                 localStorage.setItem('userEmail', updatedUser.email);
                 localStorage.setItem('userName', `${updatedUser.firstName} ${updatedUser.lastName}`);
                 currentUser.email = updatedUser.email;
@@ -1124,7 +1127,7 @@ async function loadProfilePage() {
             } catch (error) {
                 console.error('Error updating profile:', error);
                 if (error.message && !error.message.includes('Unauthorized')) {
-                    alert(`Error updating profile: ${error.message}`);
+                    showAlert(`Error updating profile: ${error.message}`, 'danger');
                 }
             }
         });
@@ -1139,12 +1142,67 @@ async function loadProfilePage() {
 
 
 function showDeveloperContact() {
-    alert(
-        "Developer Contact Information:\n\n" +
-        "Name: Raghavendra Gattu\n" +
-        "Email: gatturaghava.edu123@gmail.com\n" +
-        "LinkedIn: www.linkedin.com/in/raghavendra-gattu\n" +
-        "GitHub: github.com/Raghavendra-54\n" +
-        "Project: MyPersonal-income-expense-tracker"
+    showAlert(
+        "Developer Contact Information:<br><br>" +
+        "Name: Raghavendra Gattu<br>" +
+        "Email: gatturaghava.edu123@gmail.com<br>" +
+        "LinkedIn: <a href='https://www.linkedin.com/in/raghavendra-gattu' target='_blank'>www.linkedin.com/in/raghavendra-gattu</a><br>" +
+        "GitHub: <a href='https://github.com/Raghavendra-54' target='_blank'>github.com/Raghavendra-54</a><br>" +
+        "Project: MyPersonal-income-expense-tracker", 'info'
     );
+}
+
+// Utility functions from updated app.js
+function showAlert(message, type = 'info') {
+    const existingAlerts = document.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => alert.remove());
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    const contentArea = document.getElementById('content-area');
+    contentArea.insertBefore(alertDiv, contentArea.firstChild);
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function showCustomConfirm(message, onConfirm) {
+    const modalHtml = `
+        <div class="modal fade" id="customConfirmModal" tabindex="-1" aria-labelledby="customConfirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="customConfirmModalLabel">Confirm Action</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    const existingModal = document.getElementById('customConfirmModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const confirmModal = new bootstrap.Modal(document.getElementById('customConfirmModal'));
+    confirmModal.show();
+    document.getElementById('confirmActionBtn').addEventListener('click', () => {
+        onConfirm();
+        confirmModal.hide();
+    });
+    document.getElementById('customConfirmModal').addEventListener('hidden.bs.modal', function (event) {
+        this.remove();
+    });
 }
