@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = window.location.origin + '/api';
+const API_BASE_URL = https://finance-tracker-app-debk.onrender.com/api';
 
 // Global variables
 let currentChart = null;
