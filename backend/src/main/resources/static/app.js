@@ -142,10 +142,11 @@ function setupNavigation() {
         loadPage('profile');
     });
     
-    // Developer Contact
+   // Developer Contact
     document.getElementById('contact-link')?.addEventListener('click', (e) => {
         e.preventDefault();
-        loadPage('contact');
+        showDeveloperContact();
+        updateActiveNavigation('contact');
     });
     
     // Logout
@@ -1140,16 +1141,59 @@ async function loadProfilePage() {
 }
 
 
+// Developer Contact functions
 function showDeveloperContact() {
-    showAlert(
-        "Developer Contact Information:<br><br>" +
-        "Name: Raghavendra Gattu<br>" +
-        "Email: gatturaghava.edu123@gmail.com<br>" +
-        "LinkedIn: <a href='https://www.linkedin.com/in/raghavendra-gattu' target='_blank'>www.linkedin.com/in/raghavendra-gattu</a><br>" +
-        "GitHub: <a href='https://github.com/Raghavendra-54' target='_blank'>github.com/Raghavendra-54</a><br>" +
-        "Project: MyPersonal-income-expense-tracker", 'info'
-    );
+    const contentArea = document.getElementById('content-area');
+    contentArea.innerHTML = `
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Developer Contact</h1>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-4">Get in Touch</h3>
+                        <p class="lead mb-4">Have questions or feedback about the Finance Tracker? I'd love to hear from you!</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <i class="bi bi-envelope-fill text-primary" style="font-size: 2rem;"></i>
+                                        <h5 class="mt-3">Email</h5>
+                                        <p>gatturaghava.edu123@gmail.com</p>
+                                        <a href="mailto:gatturaghava.edu123@gmail.com" class="btn btn-outline-primary">Send Email</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <i class="bi bi-github text-dark" style="font-size: 2rem;"></i>
+                                        <h5 class="mt-3">GitHub</h5>
+                                        <p>View source code and contribute</p>
+                                        <a href="https://github.com/gattu-raghavendra" target="_blank" class="btn btn-outline-dark">View on GitHub</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5>About This Project</h5>
+                            <p class="text-muted">
+                                This Personal Finance Tracker is built with Java Spring Boot • HTML/CSS (Bootstrap 5) • JavaScript • PostgreSQL • Chart.js • Spring Security. 
+                                It is designed to help you manage your money with ease and security. It tracks income, expenses, and financial 
+                                trends through an interactive dashboard. Gain insights to control spending, plan budgets, and achieve your financial goals.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
+
 
 // Utility functions from updated app.js
 function showAlert(message, type = 'info') {
