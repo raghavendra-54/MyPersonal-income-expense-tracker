@@ -335,7 +335,7 @@ main {
         top: 0;
         left: 0;
         right: 0;
-        height: 40px;
+        height: 20px;
         background: linear-gradient(135deg, #2b2d42 0%, #1a1a2e 100%);
         color: white;
         display: flex;
